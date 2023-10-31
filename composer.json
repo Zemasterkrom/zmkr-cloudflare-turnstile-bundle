@@ -1,0 +1,38 @@
+{
+    "name": "zemasterkrom/zmkr-cloudflare-turnstile-bundle",
+    "description": "Extensible and configurable integration of Cloudflare Turnstile with Symfony",
+    "license": "MIT",
+    "type": "symfony-bundle",
+    "keywords": [
+        "cloudflare",
+        "turnstile",
+        "captcha",
+        "form",
+        "security",
+        "spam",
+        "anti-spam"
+    ],
+    "authors": [
+        {
+            "name": "Zemasterkrom",
+            "email": "zemasterkrom@outlook.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Zemasterkrom\\CfTurnstileBundle\\": "src/"
+        }
+    },
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.2.5",
+        "symfony/form": "^5.4|^6.0",
+        "symfony/framework-bundle": "^5.4|^6.0",
+        "symfony/http-client": "^5.4|^6.0",
+        "symfony/twig-bundle": "^5.4|^6.0",
+        "symfony/validator": "^5.4|^6.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
