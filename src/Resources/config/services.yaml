@@ -1,0 +1,16 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    cloudflare_turnstile.type:
+        class: Zemasterkrom\CloudflareTurnstileBundle\Type\CloudflareTurnstileType
+        tags: ["form.type"]
+        arguments:
+            $sitekey: "%zmkr_cloudflare_turnstile.sitekey%"
+
+    cloudflare_turnstile.validator:
+        class: Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator
+        tags: ["validator.constraint_validator"]
+        arguments:
+            $secretKey: "%zmkr_cloudflare_turnstile.secret_key%"

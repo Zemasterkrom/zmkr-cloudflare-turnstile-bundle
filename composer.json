@@ -20,12 +20,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Zemasterkrom\\CfTurnstileBundle\\": "src/"
+            "Zemasterkrom\\CloudflareTurnstileBundle\\": "src/"
         }
     },
     "prefer-stable": true,
     "require": {
-        "php": ">=7.2.5",
+        "php": ">=7.4",
         "symfony/form": "^5.4|^6.0",
         "symfony/framework-bundle": "^5.4|^6.0",
         "symfony/http-client": "^5.4|^6.0",
