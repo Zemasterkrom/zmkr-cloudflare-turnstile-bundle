@@ -48,7 +48,7 @@ class CloudflareTurnstileType extends AbstractType
 
     public function getBlockPrefix()
     {
-        return 'turnstile';
+        return 'zmkr_cloudflare_turnstile';
     }
 
     /**
