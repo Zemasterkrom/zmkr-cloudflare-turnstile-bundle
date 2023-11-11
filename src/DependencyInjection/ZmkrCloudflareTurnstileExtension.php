@@ -22,8 +22,27 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
         $configuration = new Configuration();
         $configs = $this->processConfiguration($configuration, $configs);
 
-        foreach ($configs as $key => $value) {
-            $container->setParameter("zmkr_cloudflare_turnstile.$key", $value);
+        $this->processContainerConfigurationRecursively($container, $configs, 'zmkr_cloudflare_turnstile');
+    }
+
+    /**
+     * Recursively processes and configures container parameters based on nested user configuration.
+     *
+     * @param ContainerBuilder $container The Symfony service container.
+     * @param array $config The configuration array to process.
+     * @param string $rootKey The root key for parameter names (used for recursive calls to increase parameter level).
+     */
+
+    private function processContainerConfigurationRecursively(ContainerBuilder $container, array $config, string $rootKey = '')
+    {
+        foreach ($config as $key => $value) {
+            $parameterName = $rootKey . '.' . $key;
+
+            if (is_array($value)) {
+                $this->processContainerConfigurationRecursively($container, $value, $parameterName);
+            } else {
+                $container->setParameter($parameterName, $value);
+            }
         }
     }
 

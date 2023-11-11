@@ -17,8 +17,17 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
-            ->scalarNode('sitekey')->isRequired()->cannotBeEmpty()->end()
-            ->scalarNode('secret_key')->isRequired()->cannotBeEmpty()->end()
+                ->arrayNode('captcha')
+                    ->children()
+                        ->scalarNode('sitekey')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('secret_key')->isRequired()->cannotBeEmpty()->end()
+                    ->end()
+                ->end()
+                ->arrayNode('error_manager')->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('throw_on_core_failure')->defaultFalse()->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

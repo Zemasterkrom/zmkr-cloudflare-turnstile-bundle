@@ -2,11 +2,18 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 
+use Symfony\Component\HttpClient\Exception\ClientException;
+use Symfony\Component\HttpClient\Exception\ServerException;
+use Symfony\Component\HttpClient\Exception\TransportException;
+use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileHttpException;
 
 /**
@@ -19,6 +26,8 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
 
     private HttpClientInterface $httpClient;
 
+    private CloudflareTurnstileErrorManager $errorManager;
+
     private string $secretKey;
 
     /**
@@ -26,12 +35,14 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
      *
      * @param RequestStack $requestStack The RequestStack for accessing the current request.
      * @param HttpClientInterface $httpClient The HTTP client for making API requests.
+     * @param CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager The error manager which handles or ignore Cloudflare Turnstile HTTP errors.
      * @param string $secretKey The Cloudflare Turnstile secret key.
      */
-    public function __construct(RequestStack $requestStack, HttpClientInterface $httpClient, string $secretKey)
+    public function __construct(RequestStack $requestStack, HttpClientInterface $httpClient, CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager, string $secretKey)
     {
         $this->requestStack = $requestStack;
         $this->httpClient = $httpClient;
+        $this->errorManager = $cloudflareTurnstileErrorManager;
         $this->secretKey = $secretKey;
     }
 
@@ -47,8 +58,9 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
     {
         $captchaResponse = $this->requestStack->getCurrentRequest()->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
 
-        if (trim($captchaResponse) === '') {
+        if ($captchaResponse === '') {
             $this->context->buildViolation($constraint->message)->addViolation();
+            return;
         }
 
         try {
@@ -68,7 +80,7 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
             }
         } catch (HttpClientExceptionInterface $e) {
             $this->context->buildViolation($constraint->message)->addViolation();
-            throw new CloudflareTurnstileHttpException('Unable to call Cloudflare Turnstile API with provided parameters', $e);
+            $this->errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileHttpException('Unable to call Cloudflare Turnstile API with provided parameters', $e));
         }
     }
 }
