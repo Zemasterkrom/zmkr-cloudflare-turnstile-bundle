@@ -23,6 +23,11 @@
             "Zemasterkrom\\CloudflareTurnstileBundle\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Zemasterkrom\\CloudflareTurnstileBundle\\Test\\": "tests/"
+        }
+    },
     "prefer-stable": true,
     "require": {
         "php": ">=7.4",
@@ -34,5 +39,14 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        }
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^5.4|^6.0"
     }
 }

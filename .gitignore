@@ -4,3 +4,9 @@ composer.lock
 
 # VSCode
 /.vscode/
+
+# Symfony
+/var/
+
+# PHPUnit
+.phpunit.result.cache

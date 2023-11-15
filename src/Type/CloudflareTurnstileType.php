@@ -41,12 +41,12 @@ class CloudflareTurnstileType extends AbstractType
      * @param FormInterface $form The form interface.
      * @param array $options An array of form options.
      */
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['sitekey'] = $this->sitekey;
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'zmkr_cloudflare_turnstile';
     }

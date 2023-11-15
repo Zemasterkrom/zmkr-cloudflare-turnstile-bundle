@@ -11,13 +11,13 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('zmkr_cloudflare_turnstile');
 
         $treeBuilder->getRootNode()
             ->children()
-                ->arrayNode('captcha')
+                ->arrayNode('captcha')->isRequired()
                     ->children()
                         ->scalarNode('sitekey')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('secret_key')->isRequired()->cannotBeEmpty()->end()
