@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Type;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -35,7 +35,7 @@ class CloudflareTurnstileType extends AbstractType
     }
 
     /**
-     * Build the view for the captcha form field and inject the captcha parameters.
+     * Injects the required captcha parameters.
      *
      * @param FormView $view The form view.
      * @param FormInterface $form The form interface.
@@ -43,6 +43,7 @@ class CloudflareTurnstileType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
+        $view->vars['attr']['class'] = trim(isset($options['attr']['class']) ? (preg_match("/\bcf-turnstile\b/", $options['attr']['class']) ? $options['attr']['class'] : 'cf-turnstile ' . trim($options['attr']['class'])) : 'cf-turnstile');
         $view->vars['sitekey'] = $this->sitekey;
     }
 
@@ -59,7 +60,7 @@ class CloudflareTurnstileType extends AbstractType
      *
      * @return string Turnstile captcha input type
      */
-    public function getParent()
+    public function getParent(): string
     {
         return HiddenType::class;
     }

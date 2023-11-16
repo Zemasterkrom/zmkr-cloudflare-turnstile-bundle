@@ -3,7 +3,7 @@
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
-use Zemasterkrom\CloudflareTurnstileBundle\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 return function (ContainerConfigurator $configurator) {

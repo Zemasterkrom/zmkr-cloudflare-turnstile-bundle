@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Zemasterkrom\CloudflareTurnstileBundle\DependencyInjection\ZmkrCloudflareTurnstileExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
-use Zemasterkrom\CloudflareTurnstileBundle\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 /**

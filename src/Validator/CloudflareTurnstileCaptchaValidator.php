@@ -2,6 +2,8 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -9,6 +11,7 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExcep
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileHttpException;
+use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileRequestException;
 
 /**
  * This class represents the core component of the bundle.
@@ -50,7 +53,13 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
      */
     public function validate(mixed $value, Constraint $constraint): void
     {
-        $captchaResponse = $this->requestStack->getCurrentRequest()->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
+        try {
+            $captchaResponse = $this->requestStack->getCurrentRequest()->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
+        } catch (RequestExceptionInterface $e) {
+            $this->context->buildViolation($constraint->message)->addViolation();
+            $this->errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileRequestException('Invalid Cloudflare Turnstile response', $e));
+            return;
+        }
 
         if ($captchaResponse === '') {
             $this->context->buildViolation($constraint->message)->addViolation();
