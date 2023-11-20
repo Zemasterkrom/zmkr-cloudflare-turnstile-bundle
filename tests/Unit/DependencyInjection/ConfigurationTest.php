@@ -24,11 +24,30 @@ class ConfigurationTest extends TestCase
     }
 
     /**
+     * This function is used to sort processed configurations by key in order to be independent from the processor interface.
+     *
+     * @param array &$array Array to sort by key
+     */
+    private function recursiveKsort(array &$array): void
+    {
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $this->recursiveKsort($value);
+            }
+        }
+
+        ksort($array);
+    }
+
+    /**
      * @dataProvider validConfigurations
      */
     public function testProcessorConfigurationSucceeds(array $providedConfig, array $expectedProcessedConfig): void
     {
         $processedConfig = $this->processor->processConfiguration($this->configuration, $providedConfig);
+
+        $this->recursiveKsort($processedConfig);
+        $this->recursiveKsort($expectedProcessedConfig);
 
         $this->assertSame($processedConfig, $expectedProcessedConfig);
     }
@@ -80,10 +99,25 @@ class ConfigurationTest extends TestCase
         $this->processor->processConfiguration($this->configuration, [[
             'captcha' => [
                 'sitekey' => '<sitekey>',
-                'secret_key' => ''
+                'secret_key' => '<secret_key>'
             ],
             'error_manager' => [
                 'throw_on_core_failure' => '<throw_on_core_failure>'
+            ]
+        ]]);
+    }
+
+    public function testProcessorWithInvalidHttpClientOptionsEntry(): void
+    {
+        $this->expectException(InvalidTypeException::class);
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'captcha' => [
+                'sitekey' => '<sitekey>',
+                'secret_key' => '<secret_key>'
+            ],
+            'http_client' => [
+                'options' => false
             ]
         ]]);
     }
@@ -107,6 +141,32 @@ class ConfigurationTest extends TestCase
                     ],
                     'error_manager' => [
                         'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => []
+                    ]
+                ]
+            ],
+            [ // Basic configuration without error_manager section options
+                [
+                    'zmkr_cloudflare_turnstile' => [
+                        'captcha' => [
+                            'sitekey' => '<sitekey>',
+                            'secret_key' => '<secret_key>'
+                        ],
+                        'error_manager' => []
+                    ]
+                ],
+                [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'error_manager' => [
+                        'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => []
                     ]
                 ]
             ],
@@ -129,6 +189,117 @@ class ConfigurationTest extends TestCase
                     ],
                     'error_manager' => [
                         'throw_on_core_failure' => true
+                    ],
+                    'http_client' => [
+                        'options' => []
+                    ]
+                ]
+            ],
+            [ // Configuration without http_client section options
+                [
+                    'zmkr_cloudflare_turnstile' => [
+                        'captcha' => [
+                            'sitekey' => '<sitekey>',
+                            'secret_key' => '<secret_key>'
+                        ],
+                        'http_client' => []
+                    ]
+                ],
+                [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'error_manager' => [
+                        'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => []
+                    ]
+                ]
+            ],
+            [ // Configuration with no HTTP option
+                [
+                    'zmkr_cloudflare_turnstile' => [
+                        'captcha' => [
+                            'sitekey' => '<sitekey>',
+                            'secret_key' => '<secret_key>'
+                        ],
+                        'http_client' => [
+                            'options' => []
+                        ]
+                    ]
+                ],
+                [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'error_manager' => [
+                        'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => []
+                    ]
+                ]
+            ],
+            [ // Configuration with single HTTP option
+                [
+                    'zmkr_cloudflare_turnstile' => [
+                        'captcha' => [
+                            'sitekey' => '<sitekey>',
+                            'secret_key' => '<secret_key>'
+                        ],
+                        'http_client' => [
+                            'options' => [
+                                'timeout' => 1
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'error_manager' => [
+                        'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => [
+                            'timeout' => 1
+                        ]
+                    ]
+                ]
+            ],
+            [ // Configuration with multiple HTTP options
+                [
+                    'zmkr_cloudflare_turnstile' => [
+                        'captcha' => [
+                            'sitekey' => '<sitekey>',
+                            'secret_key' => '<secret_key>'
+                        ],
+                        'http_client' => [
+                            'options' => [
+                                'timeout' => 1,
+                                'max_duration' => 2
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'error_manager' => [
+                        'throw_on_core_failure' => false
+                    ],
+                    'http_client' => [
+                        'options' => [
+                            'timeout' => 1,
+                            'max_duration' => 2
+                        ]
                     ]
                 ]
             ]

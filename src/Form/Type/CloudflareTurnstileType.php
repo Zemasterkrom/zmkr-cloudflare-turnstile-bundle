@@ -10,16 +10,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
- * Cloudflare Turnstile captcha form integration.
+ * Cloudflare Turnstile captcha form integration
  */
 class CloudflareTurnstileType extends AbstractType
 {
     private string $sitekey;
 
     /**
-     * TurnstileType constructor.
+     * TurnstileType constructor
      *
-     * @param string $sitekey The Cloudflare Turnstile sitekey for captcha integration.
+     * @param string $sitekey The Cloudflare Turnstile sitekey for captcha integration
      */
     public function __construct(string $sitekey)
     {
@@ -35,11 +35,11 @@ class CloudflareTurnstileType extends AbstractType
     }
 
     /**
-     * Injects the required captcha parameters.
+     * Injects the required captcha parameters
      *
-     * @param FormView $view The form view.
-     * @param FormInterface $form The form interface.
-     * @param array $options An array of form options.
+     * @param FormView $view The form view
+     * @param FormInterface $form The form interface
+     * @param array $options An array of form options
      */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
