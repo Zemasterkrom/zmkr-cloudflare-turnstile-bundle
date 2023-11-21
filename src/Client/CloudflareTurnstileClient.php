@@ -31,9 +31,9 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
 
     public function handleOptions(array ...$options): array
     {
-        return isset($this->options) ? array_filter(array_merge($this->options, $options), function ($optionName) {
+        return array_filter(array_merge(isset($this->options) ? $this->options : [], ...$options), function ($optionName) {
             return $optionName === 'body' || $optionName === 'timeout' || $optionName === 'max_duration';
-        }) : $options;
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     public function verify(string $captchaResponse, array $options = []): bool

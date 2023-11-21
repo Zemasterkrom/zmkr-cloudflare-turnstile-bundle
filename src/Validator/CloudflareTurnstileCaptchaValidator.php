@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
@@ -50,6 +51,10 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
+        if (!$constraint instanceof CloudflareTurnstileCaptcha) {
+            throw new UnexpectedTypeException($constraint, CloudflareTurnstileCaptcha::class);
+        }
+
         try {
             $captchaResponse = $this->requestStack->getCurrentRequest()->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
         } catch (RequestExceptionInterface $e) {

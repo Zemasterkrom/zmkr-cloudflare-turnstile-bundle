@@ -66,7 +66,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     /**
      * Checks that excluded parameters defined in the bundle loading class are not loaded in the container
      */
-    public function testLoadingContainerParameterExclusions(): void
+    public function testLoadingContainerParametersExclusion(): void
     {
         $this->extension->load([[
             'captcha' => [
@@ -76,11 +76,11 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         ]], $this->containerBuilder);
 
         $this->assertFalse($this->containerBuilder->hasParameter('zmkr_cloudflare_turnstile.parameters.captcha'));
-        $this->assertFalse($this->containerBuilder->hasDefinition('zmkr_cloudflare_turnstile.parameters.error_manager'));
-        $this->assertFalse($this->containerBuilder->hasDefinition('zmkr_cloudflare_turnstile.parameters.http_client'));
+        $this->assertFalse($this->containerBuilder->hasParameter('zmkr_cloudflare_turnstile.parameters.error_manager'));
+        $this->assertFalse($this->containerBuilder->hasParameter('zmkr_cloudflare_turnstile.parameters.http_client'));
     }
 
-    public function testLoadWithValidCaptchaConfig(): void
+    public function testLoadingWithValidCaptchaConfig(): void
     {
         $this->extension->load([[
             'captcha' => [
@@ -94,7 +94,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
     }
 
-    public function testLoadWithRequiredConfigAndValidErrorManagerConfig(): void
+    public function testLoadingWithRequiredConfigAndValidErrorManagerConfig(): void
     {
         $this->extension->load([[
             'captcha' => [
@@ -116,14 +116,14 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
      *
      * @dataProvider configsWithNoHttpClientOption
      */
-    public function testLoadWithRequiredConfigAndNoHttpClientOption(array $providedConfigWithNoHttpClientOption): void
+    public function testLoadingWithRequiredConfigAndNoHttpClientOption(array $providedConfigWithNoHttpClientOption): void
     {
         $this->extension->load([$providedConfigWithNoHttpClientOption], $this->containerBuilder);
 
         $this->assertCount(0, $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'));
     }
 
-    public function testLoadWithRequiredConfigAndSingleHttpClientOption(): void
+    public function testLoadingWithRequiredConfigAndSingleHttpClientOption(): void
     {
         $config = [
             'captcha' => [
@@ -143,7 +143,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'), $config['http_client']['options']);
     }
 
-    public function testLoadWithRequiredConfigAndMultipleHttpClientOptions(): void
+    public function testLoadingWithRequiredConfigAndMultipleHttpClientOptions(): void
     {
         $config = [
             'captcha' => [

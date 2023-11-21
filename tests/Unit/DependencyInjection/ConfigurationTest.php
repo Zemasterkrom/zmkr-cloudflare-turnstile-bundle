@@ -42,7 +42,7 @@ class ConfigurationTest extends TestCase
     /**
      * @dataProvider validConfigurations
      */
-    public function testProcessorConfigurationSucceeds(array $providedConfig, array $expectedProcessedConfig): void
+    public function testProcessorConfiguration(array $providedConfig, array $expectedProcessedConfig): void
     {
         $processedConfig = $this->processor->processConfiguration($this->configuration, $providedConfig);
 
