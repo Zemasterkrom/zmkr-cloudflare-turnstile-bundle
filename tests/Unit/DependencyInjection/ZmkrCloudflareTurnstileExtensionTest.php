@@ -2,6 +2,7 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
@@ -18,7 +19,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaV
 class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 {
     private ZmkrCloudflareTurnstileExtension $extension;
-    private ContainerBuilder $containerBuilder;
+    private ContainerBuilder|MockObject $containerBuilder;
 
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
@@ -49,7 +50,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->assertSame($validatorDefinition->getClass(), CloudflareTurnstileCaptchaValidator::class);
         $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileErrorManager')->__toString(), 'zmkr_cloudflare_turnstile.services.error_manager');
-        $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileClient'), CloudflareTurnstileClientInterface::class);
+        $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileClient')->__toString(), CloudflareTurnstileClientInterface::class);
 
         $errorManagerDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.error_manager');
 
@@ -61,6 +62,23 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($clientDefinition->getClass(), CloudflareTurnstileClient::class);
         $this->assertSame($clientDefinition->getArgument('$secretKey'), $this->getVariablePlaceholder(self::CAPTCHA_SECRET_KEY_REFERENCE));
         $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
+    }
+
+    public function testTwigFormThemeLoading(): void
+    {
+        $this->extension->load([[
+            'captcha' => [
+                'sitekey' => '<sitekey>',
+                'secret_key' => '<secret_key>'
+            ]
+        ]], $this->containerBuilder);
+
+        $this->containerBuilder = $this->createPartialMock(ContainerBuilder::class, ['hasExtension']);
+        $this->containerBuilder->method('hasExtension')->willReturn(true);
+
+        $this->extension->prepend($this->containerBuilder);
+
+        $this->assertSame(ZmkrCloudflareTurnstileExtension::TWIG_VIEW_FILEPATH, $this->containerBuilder->getExtensionConfig('twig')[0]['form_themes'][0]);
     }
 
     /**

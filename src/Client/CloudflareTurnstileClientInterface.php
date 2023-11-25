@@ -28,5 +28,5 @@ interface CloudflareTurnstileClientInterface
      *
      * @throws CloudflareTurnstileApiException If HTTP verification fails due to an API or HTTP-related issue
      */
-    public function verify(string $captchaResponse, array $options = []): bool;
+    public function verify($captchaResponse, array $options = []): bool;
 }

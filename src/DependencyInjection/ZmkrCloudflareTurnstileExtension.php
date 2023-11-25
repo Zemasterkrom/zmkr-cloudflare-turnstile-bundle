@@ -14,6 +14,8 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
  */
 class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExtensionInterface
 {
+    const TWIG_VIEW_FILEPATH = '@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig';
+
     public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
@@ -59,7 +61,7 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
     {
         if ($container->hasExtension('twig')) {
             $container->prependExtensionConfig('twig', [
-                'form_themes' => ['@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig']
+                'form_themes' => [self::TWIG_VIEW_FILEPATH]
             ]);
         } else {
             throw new \InvalidArgumentException('Twig is required by the bundle as Cloudflare Turnstile captcha is dynamically generated');

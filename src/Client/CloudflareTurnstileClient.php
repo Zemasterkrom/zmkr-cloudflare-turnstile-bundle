@@ -36,7 +36,7 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
         }, ARRAY_FILTER_USE_KEY);
     }
 
-    public function verify(string $captchaResponse, array $options = []): bool
+    public function verify($captchaResponse, array $options = []): bool
     {
         try {
             $apiResponse = $this->httpClient->request(
