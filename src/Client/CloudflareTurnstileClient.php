@@ -39,6 +39,10 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
     public function verify($captchaResponse, array $options = []): bool
     {
         try {
+            if (!$captchaResponse) {
+                return false;
+            }
+
             $apiResponse = $this->httpClient->request(
                 'POST',
                 'https://challenges.cloudflare.com/turnstile/v0/siteverify',

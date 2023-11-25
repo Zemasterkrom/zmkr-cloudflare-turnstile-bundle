@@ -3,6 +3,7 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Kernel;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Zemasterkrom\CloudflareTurnstileBundle\Tests\Integration\InvalidBundleTestingKernel;
 
 /**
@@ -12,7 +13,7 @@ class InvalidKernelIntegrationTest extends KernelTestCase
 {
     public function testBundleBoot()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidConfigurationException::class);
 
         self::bootKernel();
     }

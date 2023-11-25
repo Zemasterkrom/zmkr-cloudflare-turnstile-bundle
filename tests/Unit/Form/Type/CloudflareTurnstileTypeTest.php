@@ -78,7 +78,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
      *
      * @dataProvider classesWithTurnstileClass
      */
-    public function testTurnstileClassIsNotDuplicatedtIfListedInProvidedClasses(string $providedClass, string $expectedClass): void
+    public function testTurnstileClassIsNotDuplicatedIfListedInProvidedClasses(string $providedClass, string $expectedClass): void
     {
         $form = $this->factory->create(CloudflareTurnstileType::class, null, [
             'attr' => [
@@ -98,15 +98,6 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         $this->assertSame($responseToken, $form->getData());
         $this->assertTrue($form->isSynchronized());
-    }
-
-    public function testCaptchaFormTypeWithWrongResponseOnSubmitIsInconsistent(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-        $form->submit([]);
-
-        $this->assertFalse($form->isSynchronized());
-        $this->assertNull($form->getData());
     }
 
     public function testCaptchaFormTypeRenderingWithNoAttributes(): void

@@ -69,11 +69,6 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
             return;
         }
 
-        if ($captchaResponse === '') {
-            $this->context->buildViolation($constraint->message)->addViolation();
-            return;
-        }
-
         try {
             if (!$this->client->verify($captchaResponse)) {
                 $this->context->buildViolation($constraint->message)->addViolation();

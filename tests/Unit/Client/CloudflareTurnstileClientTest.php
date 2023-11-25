@@ -21,7 +21,17 @@ class CloudflareTurnstileClientTest extends TestCase
             'success' => true
         ]))), '', []);
 
-        $this->assertTrue($client->verify(''));
+        $this->assertTrue($client->verify('<captcha_response>'));
+    }
+
+    /**
+     * @dataProvider emptyCaptchaResponses
+     */
+    public function testEmptyCaptchaResponseDirectlyReturnsFailure($emptyCaptchaResponse): void
+    {
+        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', []);
+
+        $this->assertFalse($client->verify($emptyCaptchaResponse));
     }
 
     /**
@@ -31,7 +41,7 @@ class CloudflareTurnstileClientTest extends TestCase
     {
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode($unsuccessfulClientResponse))), '', []);
 
-        $this->assertFalse($client->verify(''));
+        $this->assertFalse($client->verify('<captcha_response>'));
     }
 
     public function testInvalidClientResponseVerificationThrowsException(): void
@@ -40,7 +50,7 @@ class CloudflareTurnstileClientTest extends TestCase
 
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse('')), '', []);
 
-        $this->assertFalse($client->verify(''));
+        $this->assertFalse($client->verify('<captcha_response>'));
     }
 
     /**
@@ -64,7 +74,7 @@ class CloudflareTurnstileClientTest extends TestCase
             'success' => true
         ]))), '', $clientOptions);
 
-        $this->assertTrue($client->verify(''));
+        $this->assertTrue($client->verify('<captcha_response>'));
     }
 
     /**
@@ -76,7 +86,7 @@ class CloudflareTurnstileClientTest extends TestCase
             'success' => false
         ]))), '', $clientOptions);
 
-        $this->assertFalse($client->verify(''));
+        $this->assertFalse($client->verify('<captcha_response>'));
     }
 
     /**
@@ -100,7 +110,7 @@ class CloudflareTurnstileClientTest extends TestCase
             'success' => true
         ]))), '', $clientOptions);
 
-        $this->assertTrue($client->verify('', $verificationOptions));
+        $this->assertTrue($client->verify('<captcha_response>', $verificationOptions));
     }
 
     /**
@@ -112,7 +122,7 @@ class CloudflareTurnstileClientTest extends TestCase
             'success' => false
         ]))), '', $clientOptions);
 
-        $this->assertFalse($client->verify('', $verificationOptions));
+        $this->assertFalse($client->verify('<captcha_response>', $verificationOptions));
     }
 
     /**
@@ -125,6 +135,13 @@ class CloudflareTurnstileClientTest extends TestCase
         $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
 
         $this->assertSame($expectedOptions, $client->handleOptions($firstVerificationOptions, $secondVerificationOptions));
+    }
+
+    public function emptyCaptchaResponses(): iterable
+    {
+        yield [''];
+        yield [false];
+        yield [null];
     }
 
     public function unsuccessfulClientResponsesWithoutOptions(): iterable

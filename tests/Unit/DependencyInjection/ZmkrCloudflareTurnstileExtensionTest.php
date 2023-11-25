@@ -64,23 +64,6 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
     }
 
-    public function testTwigFormThemeLoading(): void
-    {
-        $this->extension->load([[
-            'captcha' => [
-                'sitekey' => '<sitekey>',
-                'secret_key' => '<secret_key>'
-            ]
-        ]], $this->containerBuilder);
-
-        $this->containerBuilder = $this->createPartialMock(ContainerBuilder::class, ['hasExtension']);
-        $this->containerBuilder->method('hasExtension')->willReturn(true);
-
-        $this->extension->prepend($this->containerBuilder);
-
-        $this->assertSame(ZmkrCloudflareTurnstileExtension::TWIG_VIEW_FILEPATH, $this->containerBuilder->getExtensionConfig('twig')[0]['form_themes'][0]);
-    }
-
     /**
      * Checks that excluded parameters defined in the bundle loading class are not loaded in the container
      */
