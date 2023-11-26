@@ -19,7 +19,8 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaV
 class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 {
     private ZmkrCloudflareTurnstileExtension $extension;
-    private ContainerBuilder|MockObject $containerBuilder;
+    /** @var ContainerBuilder|MockObject */
+    private $containerBuilder;
 
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';

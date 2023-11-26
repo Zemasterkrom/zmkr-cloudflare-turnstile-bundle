@@ -21,9 +21,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileInvalidR
 class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
 {
     private RequestStack $requestStack;
-
     private CloudflareTurnstileErrorManager $errorManager;
-
     private CloudflareTurnstileClientInterface $client;
 
     /**

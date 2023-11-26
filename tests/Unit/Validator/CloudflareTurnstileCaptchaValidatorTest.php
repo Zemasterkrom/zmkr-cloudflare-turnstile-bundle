@@ -25,13 +25,14 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaV
 class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCase
 {
     private CloudflareTurnstileErrorManager $errorManager;
-    private RequestStack|MockObject $mockedRequestStack;
-    private $mockedValidationResponse;
+    /** @var RequestStack|MockObject */
+    private $mockedRequestStack;
+    private string $mockedValidationResponse;
 
     /**
      * Initializes default properties for the test and the validator :
      * - Disabled error manager ;
-     * - Default request
+     * - Default request ;
      * - Empty JSON message.
      */
     public function setUp(): void
@@ -45,7 +46,7 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
     }
 
     /**
-     * Creates the validator from the properties of the current test.
+     * Creates the validator from the properties of the current test
      *
      * @return CloudflareTurnstileCaptchaValidator Cloudflare Turnstile Captcha Validator with current test properties
      */
