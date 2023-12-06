@@ -37,7 +37,7 @@ jobs:
                     - php: 8.1
                       symfony: "^7.0"
             fail-fast: false
-        name: PHPUnit | PHPStan (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }})
+        name: PHPUnit (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }})
 
         steps:
             - name: Checkout repository
@@ -47,7 +47,12 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php }}
-                  extensions: curl, xml
+
+            - name: Disable PSR extension
+              run: |
+                  if php -m | grep -q 'psr'; then
+                      phpdismod psr
+                  fi
 
             - name: Symfony version auto-configuration
               run: |
