@@ -39,7 +39,7 @@ class CloudflareTurnstileType extends AbstractType
      *
      * @param FormView $view The form view
      * @param FormInterface $form The form interface
-     * @param array $options An array of form options
+     * @param array<string, mixed> $options An array of form options
      */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {

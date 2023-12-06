@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Client;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Client;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -17,6 +17,7 @@ class CloudflareTurnstileClientTest extends TestCase
 {
     public function testSuccessfulClientResponseVerificationWithoutOptions(): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => true
         ]))), '', []);
@@ -39,6 +40,7 @@ class CloudflareTurnstileClientTest extends TestCase
      */
     public function testUnsuccessfulClientResponseVerificationWithoutOptions(array $unsuccessfulClientResponse): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode($unsuccessfulClientResponse))), '', []);
 
         $this->assertFalse($client->verify('<captcha_response>'));
@@ -70,6 +72,7 @@ class CloudflareTurnstileClientTest extends TestCase
      */
     public function testSuccessfulClientResponseVerificationWithoutCustomVerificationOptions(array $clientOptions): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => true
         ]))), '', $clientOptions);
@@ -82,6 +85,7 @@ class CloudflareTurnstileClientTest extends TestCase
      */
     public function testUnsuccessfulClientResponseVerificationWithoutCustomVerificationOptions(array $clientOptions): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => false
         ]))), '', $clientOptions);
@@ -106,6 +110,7 @@ class CloudflareTurnstileClientTest extends TestCase
      */
     public function testSuccessfulClientResponseWithCustomVerificationOptions(array $clientOptions, array $verificationOptions): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => true
         ]))), '', $clientOptions);
@@ -118,6 +123,7 @@ class CloudflareTurnstileClientTest extends TestCase
      */
     public function testUnsuccessfulClientResponseWithCustomVerificationOptions(array $clientOptions, array $verificationOptions): void
     {
+        /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => false
         ]))), '', $clientOptions);

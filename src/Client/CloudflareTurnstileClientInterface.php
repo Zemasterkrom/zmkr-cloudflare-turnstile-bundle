@@ -12,17 +12,17 @@ interface CloudflareTurnstileClientInterface
     /**
      * Combines and filters default and custom options for HTTP requests
      *
-     * @param mixed ...$options Additional HTTP options array
+     * @param array<string, mixed> ...$options Additional HTTP options array
      *
-     * @return array Filtered array of combined options
+     * @return array<string, mixed> Filtered array of combined options
      */
     public function handleOptions(array ...$options): array;
 
     /**
      * Verify the provided Cloudflare Turnstile captcha response
      *
-     * @param string $captchaResponse Cloudflare Turnstile captcha response
-     * @param array $options Array of additional options
+     * @param mixed $captchaResponse Cloudflare Turnstile captcha response
+     * @param array<string, mixed> $options Array of additional options
      *
      * @return bool True if the verification is successful, false otherwise
      *

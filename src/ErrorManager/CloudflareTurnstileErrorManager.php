@@ -26,7 +26,7 @@ class CloudflareTurnstileErrorManager
      *
      * @param CloudflareTurnstileException $cloudflareTurnstileException Cloudflare Turnstile bundle exception
      */
-    public function throwIfExplicitErrorsEnabled(CloudflareTurnstileException $cloudflareTurnstileException)
+    public function throwIfExplicitErrorsEnabled(CloudflareTurnstileException $cloudflareTurnstileException): void
     {
         if ($this->throwOnCoreFailure) {
             throw $cloudflareTurnstileException;

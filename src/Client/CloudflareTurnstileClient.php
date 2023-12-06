@@ -13,6 +13,8 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
 {
     private HttpClientInterface $httpClient;
     private string $secretKey;
+
+    /** @var array<string, mixed> */
     private array $options;
 
     /**
@@ -20,7 +22,7 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
      *
      * @param HttpClientInterface $httpClient The HTTP client for making API requests
      * @param string $secretKey The registered Cloudflare Turnstile secret key
-     * @param array $options Additional options for HTTP requests. Allowed options : body, timeout, max_duration.
+     * @param array<string, mixed> $options Additional options for HTTP requests. Allowed options : body, timeout, max_duration.
      */
     public function __construct(HttpClientInterface $httpClient, string $secretKey, array $options)
     {

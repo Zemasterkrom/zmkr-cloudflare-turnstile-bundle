@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\DependencyInjection;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -26,7 +26,7 @@ class ConfigurationTest extends TestCase
     /**
      * This function is used to sort processed configurations by key in order to be independent from the processor interface.
      *
-     * @param array &$array Array to sort by key
+     * @param array<string, mixed> $array Array to sort by key
      */
     private function recursiveKsort(array &$array): void
     {
@@ -122,148 +122,143 @@ class ConfigurationTest extends TestCase
         ]]);
     }
 
-    public function validConfigurations(): array
+    public function validConfigurations(): iterable
     {
-        return [
-            [ // Basic configuration without error_manager section
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ]
+        // Basic configuration without error_manager section
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
                     ]
+                ]
+            ],
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
                 ],
-                [
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
+                ]
+            ]
+        ];
+
+        // Basic configuration without error_manager section options
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
                     'captcha' => [
                         'sitekey' => '<sitekey>',
                         'secret_key' => '<secret_key>'
                     ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
-                    ],
-                    'http_client' => [
-                        'options' => []
-                    ]
+                    'error_manager' => []
                 ]
             ],
-            [ // Basic configuration without error_manager section options
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'error_manager' => []
-                    ]
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
                 ],
-                [
-                    'captcha' => [
-                        'sitekey' => '<sitekey>',
-                        'secret_key' => '<secret_key>'
-                    ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
-                    ],
-                    'http_client' => [
-                        'options' => []
-                    ]
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
                 ]
-            ],
-            [ // Configuration with core exception throwing enabled
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'error_manager' => [
-                            'throw_on_core_failure' => true
-                        ]
-                    ]
-                ],
-                [
+            ]
+        ];
+
+        // Configuration with core exception throwing enabled
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
                     'captcha' => [
                         'sitekey' => '<sitekey>',
                         'secret_key' => '<secret_key>'
                     ],
                     'error_manager' => [
                         'throw_on_core_failure' => true
+                    ]
+                ]
+            ],
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
+                ],
+                'error_manager' => [
+                    'throw_on_core_failure' => true
+                ],
+                'http_client' => [
+                    'options' => []
+                ]
+            ]
+        ];
+
+        // Configuration without http_client section options
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ],
+                    'http_client' => []
+                ]
+            ],
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
+                ],
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
+                ]
+            ]
+        ];
+
+        // Configuration with no HTTP option
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
                     ],
                     'http_client' => [
                         'options' => []
                     ]
                 ]
             ],
-            [ // Configuration without http_client section options
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'http_client' => []
-                    ]
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
                 ],
-                [
-                    'captcha' => [
-                        'sitekey' => '<sitekey>',
-                        'secret_key' => '<secret_key>'
-                    ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
-                    ],
-                    'http_client' => [
-                        'options' => []
-                    ]
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
                 ]
-            ],
-            [ // Configuration with no HTTP option
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'http_client' => [
-                            'options' => []
-                        ]
-                    ]
-                ],
-                [
+            ]
+        ];
+
+        // Configuration with single HTTP option
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
                     'captcha' => [
                         'sitekey' => '<sitekey>',
                         'secret_key' => '<secret_key>'
-                    ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
-                    ],
-                    'http_client' => [
-                        'options' => []
-                    ]
-                ]
-            ],
-            [ // Configuration with single HTTP option
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'http_client' => [
-                            'options' => [
-                                'timeout' => 1
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    'captcha' => [
-                        'sitekey' => '<sitekey>',
-                        'secret_key' => '<secret_key>'
-                    ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
                     ],
                     'http_client' => [
                         'options' => [
@@ -272,34 +267,50 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [ // Configuration with multiple HTTP options
-                [
-                    'zmkr_cloudflare_turnstile' => [
-                        'captcha' => [
-                            'sitekey' => '<sitekey>',
-                            'secret_key' => '<secret_key>'
-                        ],
-                        'http_client' => [
-                            'options' => [
-                                'timeout' => 1,
-                                'max_duration' => 2
-                            ]
-                        ]
-                    ]
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
                 ],
-                [
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => [
+                        'timeout' => 1
+                    ]
+                ]
+            ]
+        ];
+
+        // Configuration with multiple HTTP options
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
                     'captcha' => [
                         'sitekey' => '<sitekey>',
                         'secret_key' => '<secret_key>'
-                    ],
-                    'error_manager' => [
-                        'throw_on_core_failure' => false
                     ],
                     'http_client' => [
                         'options' => [
                             'timeout' => 1,
                             'max_duration' => 2
                         ]
+                    ]
+                ]
+            ],
+            [
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
+                ],
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => [
+                        'timeout' => 1,
+                        'max_duration' => 2
                     ]
                 ]
             ]

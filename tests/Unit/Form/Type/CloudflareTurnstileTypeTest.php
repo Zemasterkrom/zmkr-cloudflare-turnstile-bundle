@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Form\Type;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Form\Type;
 
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Component\Form\FormRenderer;
@@ -33,7 +33,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         )));
     }
 
-    protected function getExtensions()
+    protected function getExtensions(): array
     {
         return [
             new PreloadedExtension([

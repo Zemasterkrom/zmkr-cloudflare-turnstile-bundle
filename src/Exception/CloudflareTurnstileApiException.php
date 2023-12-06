@@ -9,8 +9,4 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExcep
  */
 class CloudflareTurnstileApiException extends CloudflareTurnstileException
 {
-    public function __construct(string $message, HttpClientExceptionInterface $previous = null, int $code = self::NON_CRITICAL_ERROR)
-    {
-        parent::__construct($message, $previous, $code);
-    }
 }

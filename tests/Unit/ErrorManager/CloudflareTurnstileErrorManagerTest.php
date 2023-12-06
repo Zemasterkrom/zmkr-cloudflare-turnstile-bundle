@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\ErrorManager;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\ErrorManager;
 
 use PHPUnit\Framework\TestCase;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;

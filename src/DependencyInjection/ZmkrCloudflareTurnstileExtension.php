@@ -34,12 +34,11 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
      * Recursively processes and configures container parameters based on nested user configuration
      *
      * @param ContainerBuilder $container The Symfony service container
-     * @param array $config The configuration array to process
-     * @param array $excludedDefinitions The definitions to exclude from container registration (unnecessary records)
+     * @param array<string, mixed> $config The configuration array to process
+     * @param array<string> $excludedDefinitions The definitions to exclude from container registration (unnecessary records)
      * @param string $rootKey The root key for parameter names (used for recursive calls to increase parameter level)
      * @param string $keyPath The recursive path to the key-value association from the root key
      */
-
     private function processContainerConfiguration(ContainerBuilder $container, array $config, array $excludedDefinitions, string $rootKey = '', string $keyPath = ''): void
     {
         foreach ($config as $key => $value) {

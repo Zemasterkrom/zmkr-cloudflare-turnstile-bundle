@@ -18,6 +18,20 @@
             "email": "zemasterkrom@outlook.fr"
         }
     ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/form": "^5.0|^6.0|^7.0",
+        "symfony/framework-bundle": "^5.0|^6.0|^7.0",
+        "symfony/http-client": "^5.0|^6.0|^7.0",
+        "symfony/translation": "^5.0|^6.0|^7.0",
+        "symfony/twig-bundle": "^5.0|^6.0|^7.0",
+        "symfony/validator": "^5.0|^6.0|^7.0"
+    },
+    "require-dev": {
+        "dg/bypass-finals": "^1.5",
+        "phpstan/phpstan-symfony": "^1.3",
+        "symfony/phpunit-bridge": "^5.0|^6.0|^7.0"
+    },
     "autoload": {
         "psr-4": {
             "Zemasterkrom\\CloudflareTurnstileBundle\\": "src/"
@@ -28,25 +42,12 @@
             "Zemasterkrom\\CloudflareTurnstileBundle\\Test\\": "tests/"
         }
     },
-    "prefer-stable": true,
-    "require": {
-        "php": ">=7.4",
-        "symfony/form": "^5.4|^6.0",
-        "symfony/framework-bundle": "^5.4|^6.0",
-        "symfony/http-client": "^5.4|^6.0",
-        "symfony/twig-bundle": "^5.4|^6.0",
-        "symfony/validator": "^5.4|^6.0"
-    },
     "config": {
         "sort-packages": true
     },
     "scripts": {
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        }
+        "phpunit": "./vendor/bin/simple-phpunit",
+        "phpstan": "./vendor/bin/phpstan analyse"
     },
-    "require-dev": {
-        "symfony/phpunit-bridge": "^5.4|^6.0"
-    }
+    "minimum-stability": "dev"
 }

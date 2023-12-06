@@ -5,6 +5,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -12,6 +13,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiException;
+use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileException;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileInvalidResponseException;
 
 /**
@@ -28,9 +30,8 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
      * Constructor for the validator.
      *
      * @param RequestStack $requestStack The RequestStack for accessing the current request.
-     * @param HttpClientInterface $httpClient The HTTP client for making API requests.
+     * @param CloudflareTurnstileClientInterface $cloudflareTurnstileClient The HTTP client for making API requests.
      * @param CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager The error manager which handles or ignore Cloudflare Turnstile HTTP errors.
-     * @param string $secretKey The Cloudflare Turnstile secret key.
      */
     public function __construct(RequestStack $requestStack, CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager, CloudflareTurnstileClientInterface $cloudflareTurnstileClient)
     {
@@ -55,25 +56,41 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
         }
 
         try {
-            $captchaResponse = $this->requestStack->getCurrentRequest()->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
+            $captchaResponseToken = $this->getCaptchaResponseToken();
 
-            // Keep consistent InputBag behavior between Symfony 5 and Symfony 6
-            if (null !== $captchaResponse && !\is_scalar($captchaResponse) && !$captchaResponse instanceof \Stringable) {
-                throw new BadRequestException(sprintf('Input value "%s" contains a non-scalar value.', 'cf-turnstile-response'));
-            }
-        } catch (RequestExceptionInterface $e) {
-            $this->context->buildViolation($constraint->message)->addViolation();
-            $this->errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileInvalidResponseException('Invalid Cloudflare Turnstile response', $e));
-            return;
-        }
-
-        try {
-            if (!$this->client->verify($captchaResponse)) {
+            if (!$this->client->verify($captchaResponseToken)) {
                 $this->context->buildViolation($constraint->message)->addViolation();
             }
-        } catch (CloudflareTurnstileApiException $e) {
+        } catch (CloudflareTurnstileException $e) {
             $this->context->buildViolation($constraint->message)->addViolation();
             $this->errorManager->throwIfExplicitErrorsEnabled($e);
         }
+    }
+
+    /**
+     * Returns the Cloudflare Turnstile Captcha token associated to the request
+     *
+     * @throws CloudflareTurnstileInvalidResponseException If the incoming request or the provided Cloudflare Turnstile captcha is invalid
+     *
+     * @return string|int|float|bool|null Cloudflare Turnstile Captcha response
+     */
+    private function getCaptchaResponseToken()
+    {
+        try {
+            if ($currentRequest = $this->requestStack->getCurrentRequest()) {
+                $captchaResponseToken = $currentRequest->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
+            } else {
+                throw new CloudflareTurnstileInvalidResponseException('Invalid incoming request. Have you initialized the request correctly?');
+            }
+        } catch (RequestExceptionInterface $e) {
+            throw new CloudflareTurnstileInvalidResponseException('Invalid Cloudflare Turnstile response. Captcha must be unique.', $e);
+        }
+
+        // Keep consistent InputBag behavior between Symfony 5 and Symfony 6
+        if (null !== $captchaResponseToken && !\is_scalar($captchaResponseToken) && !$captchaResponseToken instanceof \Stringable) {
+            throw new CloudflareTurnstileInvalidResponseException('Invalid Cloudflare Turnstile response. Captcha must be unique.');
+        }
+
+        return $captchaResponseToken;
     }
 }

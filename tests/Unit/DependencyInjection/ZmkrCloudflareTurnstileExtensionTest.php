@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\DependencyInjection;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\DependencyInjection;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,8 +19,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaV
 class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 {
     private ZmkrCloudflareTurnstileExtension $extension;
-    /** @var ContainerBuilder|MockObject */
-    private $containerBuilder;
+    private ContainerBuilder $containerBuilder;
 
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
@@ -63,6 +62,18 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($clientDefinition->getClass(), CloudflareTurnstileClient::class);
         $this->assertSame($clientDefinition->getArgument('$secretKey'), $this->getVariablePlaceholder(self::CAPTCHA_SECRET_KEY_REFERENCE));
         $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
+    }
+
+    public function testTwigThemeIsLoadedCorrectly(): void
+    {
+        $mockedContainerBuilder = $this->createPartialMock(ContainerBuilder::class, ['hasExtension']);
+        $mockedContainerBuilder->method('hasExtension')->willReturn(true);
+
+        $this->extension->prepend($mockedContainerBuilder);
+
+        $this->assertCount(1, array_filter($mockedContainerBuilder->getExtensionConfig('twig')[0]['form_themes'], function ($v) {
+            return str_contains($v, 'zmkr_cloudflare_turnstile_widget');
+        }));
     }
 
     /**
@@ -122,6 +133,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     {
         $this->extension->load([$providedConfigWithNoHttpClientOption], $this->containerBuilder);
 
+        /** @phpstan-ignore-next-line */
         $this->assertCount(0, $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'));
     }
 
