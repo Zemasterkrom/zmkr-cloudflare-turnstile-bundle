@@ -43,7 +43,7 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
     /**
      * Validates the Cloudflare Turnstile captcha response
      *
-     * @param mixed $value The input text value that is not used due to the captcha response type (hidden response)
+     * @param mixed $value Unused input value (captcha response comes from a dynamically generated hidden token named cf-turnstile-response)
      * @param Constraint $constraint The captcha constraint being validated
      *
      * @throws CloudflareTurnstileInvalidResponseException If the response returned by Cloudflare Turnstile has been modified / is invalid (if error manager handling is enabled)
@@ -56,7 +56,7 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
         }
 
         try {
-            $captchaResponseToken = $this->getCaptchaResponseToken();
+            $captchaResponseToken = $this->getProvidedCaptchaResponseToken();
 
             if (!$this->client->verify($captchaResponseToken)) {
                 $this->context->buildViolation($constraint->message)->addViolation();
@@ -72,22 +72,23 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
      *
      * @throws CloudflareTurnstileInvalidResponseException If the incoming request or the provided Cloudflare Turnstile captcha is invalid
      *
-     * @return string|int|float|bool|null Cloudflare Turnstile Captcha response
+     * @return mixed Provided Cloudflare Turnstile Captcha response token, which should normally be a string if the request is correctly constructed
      */
-    private function getCaptchaResponseToken()
+    private function getProvidedCaptchaResponseToken()
     {
         try {
             if ($currentRequest = $this->requestStack->getCurrentRequest()) {
-                $captchaResponseToken = $currentRequest->request->get('cf-turnstile-response'); // Provided by the hidden input field with name cf-turnstile-response
+                /** @var mixed */
+                $captchaResponseToken = $currentRequest->request->get('cf-turnstile-response');
             } else {
-                throw new CloudflareTurnstileInvalidResponseException('Invalid incoming request. Have you initialized the request correctly?');
+                throw new CloudflareTurnstileInvalidResponseException('Invalid incoming request. Please check the provided request.');
             }
         } catch (RequestExceptionInterface $e) {
             throw new CloudflareTurnstileInvalidResponseException('Invalid Cloudflare Turnstile response. Captcha must be unique.', $e);
         }
 
         // Keep consistent InputBag behavior between Symfony 5 and Symfony 6
-        if (null !== $captchaResponseToken && !\is_scalar($captchaResponseToken) && !$captchaResponseToken instanceof \Stringable) {
+        if (null !== $captchaResponseToken && !\is_scalar($captchaResponseToken) && !(\is_object($captchaResponseToken) && method_exists($captchaResponseToken, '__toString'))) {
             throw new CloudflareTurnstileInvalidResponseException('Invalid Cloudflare Turnstile response. Captcha must be unique.');
         }
 

@@ -5,10 +5,11 @@ parameters:
     paths:
         - src
         - tests
-    treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
+    checkGenericClassInNonGenericObjectType: true # The issue is that template annotations are not present in the utility test classes of earlier versions
     ignoreErrors:
         - "#test.* has parameter .* with no value type specified in iterable type#"
         - "#test.* has parameter .* with no type specified#"
         - "#Test::.* return type has no value type specified in iterable type#"
-        - "#UnitEnum#"
+        - "#Test extends generic class .* but does not specify its types#"
+
