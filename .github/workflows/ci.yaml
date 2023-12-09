@@ -68,3 +68,32 @@ jobs:
 
       - name: Run PHPStan tests
         run: composer phpstan
+
+  code-coverage:
+    runs-on: ubuntu-latest
+    name: Code coverage
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          extensions: none, curl, mbstring, xml, simplexml, xmlwriter, dom, tokenizer, json
+          coverage: xdebug
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: --prefer-stable
+
+      - name: Run PHPUnit tests with coverage report
+        run: composer phpunit -- --coverage-clover ./coverage.xml
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
