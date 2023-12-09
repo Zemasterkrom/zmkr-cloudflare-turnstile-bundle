@@ -5,6 +5,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Client;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiException;
@@ -28,7 +29,7 @@ class CloudflareTurnstileClientTest extends TestCase
     /**
      * @dataProvider emptyCaptchaResponses
      */
-    public function testEmptyCaptchaResponseDirectlyReturnsFailure($emptyCaptchaResponse): void
+    public function testEmptyCaptchaResponseDirectlyReturnsFailureOnVerification($emptyCaptchaResponse): void
     {
         $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', []);
 
@@ -36,7 +37,7 @@ class CloudflareTurnstileClientTest extends TestCase
     }
 
     /**
-     * @dataProvider unsuccessfulClientResponsesWithoutOptions
+     * @dataProvider unsuccessfulClientResponses
      */
     public function testUnsuccessfulClientResponseVerificationWithoutOptions(array $unsuccessfulClientResponse): void
     {
@@ -50,55 +51,21 @@ class CloudflareTurnstileClientTest extends TestCase
     {
         $this->expectException(CloudflareTurnstileApiException::class);
 
-        $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse('')), '', []);
+        $mockedHttpClient = $this->createMock(HttpClientInterface::class);
+        $mockedHttpClient->method('request')
+            ->willThrowException($this->createMock(ExceptionInterface::class));
 
-        $this->assertFalse($client->verify('<captcha_response>'));
+        $client = new CloudflareTurnstileClient($mockedHttpClient, '', []);
+
+        $client->verify('<captcha_response>');
     }
 
     /**
-     * Checks that client options are correctly initialized and that only configured options are retained
+     * Checks that client options and custom verification options are correctly merged
      *
-     * @dataProvider clientOptionsWithoutCustomVerificationOptions
+     * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testClientOptionsWithoutCustomVerificationOptions(array $clientOptions, array $expectedOptions): void
-    {
-        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
-
-        $this->assertSame($expectedOptions, $client->handleOptions());
-    }
-
-    /**
-     * @dataProvider clientOptionsWithoutCustomVerificationOptions
-     */
-    public function testSuccessfulClientResponseVerificationWithoutCustomVerificationOptions(array $clientOptions): void
-    {
-        /** @phpstan-ignore-next-line */
-        $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
-            'success' => true
-        ]))), '', $clientOptions);
-
-        $this->assertTrue($client->verify('<captcha_response>'));
-    }
-
-    /**
-     * @dataProvider clientOptionsWithoutCustomVerificationOptions
-     */
-    public function testUnsuccessfulClientResponseVerificationWithoutCustomVerificationOptions(array $clientOptions): void
-    {
-        /** @phpstan-ignore-next-line */
-        $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
-            'success' => false
-        ]))), '', $clientOptions);
-
-        $this->assertFalse($client->verify('<captcha_response>'));
-    }
-
-    /**
-     * Checks that client options and custom verification options are correctly merged and that only configured options are retained
-     *
-     * @dataProvider clientOptionsWithCustomVerificationOptions
-     */
-    public function testClientOptionsWithCustomVerificationOptions(array $clientOptions, array $verificationOptions, array $expectedOptions): void
+    public function testClientOptionsWithVerificationOptions(array $clientOptions, array $verificationOptions, array $expectedOptions): void
     {
         $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
 
@@ -106,9 +73,9 @@ class CloudflareTurnstileClientTest extends TestCase
     }
 
     /**
-     * @dataProvider clientOptionsWithCustomVerificationOptions
+     * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testSuccessfulClientResponseWithCustomVerificationOptions(array $clientOptions, array $verificationOptions): void
+    public function testSuccessfulClientResponseWithVerificationOptions(array $clientOptions, array $verificationOptions): void
     {
         /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
@@ -119,9 +86,9 @@ class CloudflareTurnstileClientTest extends TestCase
     }
 
     /**
-     * @dataProvider clientOptionsWithCustomVerificationOptions
+     * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testUnsuccessfulClientResponseWithCustomVerificationOptions(array $clientOptions, array $verificationOptions): void
+    public function testUnsuccessfulClientResponseWithVerificationOptions(array $clientOptions, array $verificationOptions): void
     {
         /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
@@ -132,11 +99,11 @@ class CloudflareTurnstileClientTest extends TestCase
     }
 
     /**
-     * Checks that client options and custom verification options arrays (with spread operator) are correctly merged and that only configured options are retained
+     * Checks that client options and custom verification options arrays (with spread operator) are correctly merged
      *
-     * @dataProvider clientOptionsWithCustomVerificationOptionsArrays
+     * @dataProvider clientOptionsWithVerificationOptionsCombinations
      */
-    public function testClientOptionsWithCustomVerificationOptionsArrays(array $clientOptions, array $firstVerificationOptions, array $secondVerificationOptions, array $expectedOptions): void
+    public function testClientOptionsWithVerificationOptionsCombinations(array $clientOptions, array $firstVerificationOptions, array $secondVerificationOptions, array $expectedOptions): void
     {
         $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
 
@@ -150,7 +117,7 @@ class CloudflareTurnstileClientTest extends TestCase
         yield [null];
     }
 
-    public function unsuccessfulClientResponsesWithoutOptions(): iterable
+    public function unsuccessfulClientResponses(): iterable
     {
         yield [
             [
@@ -169,62 +136,7 @@ class CloudflareTurnstileClientTest extends TestCase
         ];
     }
 
-    public function clientOptionsWithoutCustomVerificationOptions(): iterable
-    {
-        yield [
-            [],
-            []
-        ];
-
-        yield [
-            [
-                'timeout' => 1
-            ],
-            [
-                'timeout' => 1
-            ]
-        ];
-
-        yield [
-            [
-                'timeout' => 1,
-                'max_duration' => 2
-            ],
-            [
-                'timeout' => 1,
-                'max_duration' => 2
-            ]
-        ];
-
-        yield [
-            [
-                'body' => [],
-                'timeout' => 1,
-                'max_duration' => 2
-            ],
-            [
-                'body' => [],
-                'timeout' => 1,
-                'max_duration' => 2
-            ]
-        ];
-
-        yield [
-            [
-                'body' => [],
-                'timeout' => 1,
-                'max_duration' => 2,
-                'unknown_option' => true
-            ],
-            [
-                'body' => [],
-                'timeout' => 1,
-                'max_duration' => 2
-            ]
-        ];
-    }
-
-    public function clientOptionsWithCustomVerificationOptions(): iterable
+    public function clientOptionsWithVerificationOptions(): iterable
     {
         yield [
             [],
@@ -237,8 +149,36 @@ class CloudflareTurnstileClientTest extends TestCase
             [
                 'body' => [],
                 'timeout' => 1,
-                'max_duration' => 3,
-                'unknown_option' => true
+                'max_duration' => 3
+            ],
+            [
+                'body' => [],
+                'timeout' => 1,
+                'max_duration' => 3
+            ]
+        ];
+
+        yield [
+            [
+                'body' => [],
+                'timeout' => 1,
+                'max_duration' => 3
+            ],
+            [],
+            [
+                'body' => [],
+                'timeout' => 1,
+                'max_duration' => 3
+            ]
+        ];
+
+        yield [
+            [
+                'body' => [],
+                'timeout' => 1,
+            ],
+            [
+                'max_duration' => 3
             ],
             [
                 'body' => [],
@@ -259,8 +199,7 @@ class CloudflareTurnstileClientTest extends TestCase
                     'test' => true
                 ],
                 'timeout' => 2,
-                'max_duration' => 3,
-                'unknown_option' => true
+                'max_duration' => 3
             ],
             [
                 'body' => [
@@ -284,8 +223,7 @@ class CloudflareTurnstileClientTest extends TestCase
                     'test' => true
                 ],
                 'timeout' => 2,
-                'max_duration' => 3,
-                'unknown_option' => true
+                'max_duration' => 3
             ],
             [
                 'body' => [
@@ -305,8 +243,7 @@ class CloudflareTurnstileClientTest extends TestCase
                 'body' => [
                     'test' => true
                 ],
-                'timeout' => 2,
-                'unknown_option' => true
+                'timeout' => 2
             ],
             [
                 'max_duration' => 3,
@@ -318,7 +255,7 @@ class CloudflareTurnstileClientTest extends TestCase
         ];
     }
 
-    public function clientOptionsWithCustomVerificationOptionsArrays(): iterable
+    public function clientOptionsWithVerificationOptionsCombinations(): iterable
     {
         yield [
             [],
@@ -329,11 +266,102 @@ class CloudflareTurnstileClientTest extends TestCase
 
         yield [
             [],
+            [],
+            [
+                'max_duration' => 2
+            ],
+            [
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [
+                'max_duration' => 2
+            ],
+            [],
+            [],
+            [
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [],
+            [
+                'timeout' => 1
+            ],
+            [
+                'max_duration' => 2
+            ],
+            [
+                'timeout' => 1,
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [
+                'timeout' => 1
+            ],
+            [],
+            [
+                'max_duration' => 2
+            ],
+            [
+                'timeout' => 1,
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [
+                'body' => [
+                    'test' => true
+                ]
+            ],
+            [
+                'timeout' => 1
+            ],
+            [
+                'max_duration' => 2
+            ],
+            [
+                'body' => [
+                    'test' => true
+                ],
+                'timeout' => 1,
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [
+                'body' => [
+                    'test' => true
+                ]
+            ],
+            [
+                'timeout' => 1
+            ],
+            [
+                'max_duration' => 2
+            ],
+            [
+                'body' => [
+                    'test' => true
+                ],
+                'timeout' => 1,
+                'max_duration' => 2,
+            ]
+        ];
+
+        yield [
+            [],
             [
                 'body' => [],
                 'timeout' => 1,
-                'max_duration' => 3,
-                'unknown_option' => true
+                'max_duration' => 3
             ],
             [
                 'body' => [],
@@ -400,21 +428,19 @@ class CloudflareTurnstileClientTest extends TestCase
             ],
             [
                 'body' => [
-                    'test' => false
+                    'test' => true
                 ],
                 'timeout' => 1,
-                'max_duration' => 1,
-                'unknown_option' => true
+                'max_duration' => 1
             ],
             [
                 'body' => [
-                    'test' => true
-                ],
-                'unknown_option' => true
+                    'test' => false
+                ]
             ],
             [
                 'body' => [
-                    'test' => true
+                    'test' => false
                 ],
                 'timeout' => 1,
                 'max_duration' => 1
