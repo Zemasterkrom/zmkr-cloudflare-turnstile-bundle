@@ -17,6 +17,9 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
+                ->booleanNode('enabled')
+                    ->defaultTrue()
+                ->end()
                 ->arrayNode('captcha')
                     ->isRequired()
                     ->children()

@@ -1,7 +1,9 @@
 {% block zmkr_cloudflare_turnstile_widget %}
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
-    <div {%- for attr_name, attr_value in attr -%}
-        {{- ' ' -}}
-        {{- attr_name -}}="{{ attr_value }}"
-    {%- endfor %} data-sitekey="{{ sitekey }}"></div>
+    {%- if enabled -%}
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+        <div {%- for attr_name, attr_value in attr -%}
+            {{- ' ' -}}
+            {{- attr_name -}}="{{ attr_value }}"
+        {%- endfor %} data-sitekey="{{ sitekey }}"></div>
+    {%- endif -%}
 {% endblock %}

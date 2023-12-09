@@ -4,6 +4,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Form\Type;
 
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Component\Form\FormRenderer;
+use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Twig\Environment;
@@ -17,13 +18,12 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 class CloudflareTurnstileTypeTest extends TypeTestCase
 {
     private FormRenderer $formRenderer;
+    private CloudflareTurnstileType $type;
 
     const CAPTCHA_SITEKEY = 'sitekey';
 
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->formRenderer = new FormRenderer(new TwigRendererEngine([
             'zmkr_cloudflare_turnstile_widget.html.twig'
         ], new Environment(
@@ -31,15 +31,23 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
                 __DIR__ . '/../../../../src/Resources/views'
             ])
         )));
+
+        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, true));
     }
 
     protected function getExtensions(): array
     {
         return [
             new PreloadedExtension([
-                new CloudflareTurnstileType(self::CAPTCHA_SITEKEY)
-            ], []),
+                $this->type
+            ], [])
         ];
+    }
+
+    private function initializeFormTypeFactory(CloudflareTurnstileType $type): void
+    {
+        $this->type = $type;
+        parent::setUp();
     }
 
     public function testCaptchaConstraintIsLoaded(): void
@@ -55,6 +63,15 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['sitekey']);
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
+        $this->assertTrue($formView->vars['enabled']);
+    }
+
+    public function testCaptchaFormTypeEnabledFlagOnDisabledState(): void
+    {
+        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, false));
+        $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
+
+        $this->assertFalse($formView->vars['enabled']);
     }
 
     /**
@@ -98,6 +115,14 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         $this->assertSame($responseToken, $form->getData());
         $this->assertTrue($form->isSynchronized());
+    }
+
+    public function testCaptchaFormTypeIsNotRenderedIfDisabled(): void
+    {
+        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, false));
+        $form = $this->factory->create(CloudflareTurnstileType::class);
+
+        $this->assertEmpty($this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
     }
 
     public function testCaptchaFormTypeRenderingWithNoAttributes(): void

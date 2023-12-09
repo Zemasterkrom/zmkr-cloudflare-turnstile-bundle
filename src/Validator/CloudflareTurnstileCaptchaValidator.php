@@ -2,6 +2,8 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 
+use Exception;
+use PHPStan\Symfony\Parameter;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -10,6 +12,7 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Zemasterkrom\CloudflareTurnstileBundle\Adapter\ParameterBagAdapter;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiException;
@@ -25,19 +28,22 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
     private RequestStack $requestStack;
     private CloudflareTurnstileErrorManager $errorManager;
     private CloudflareTurnstileClientInterface $client;
+    private bool $enabled;
 
     /**
      * Constructor for the validator.
      *
-     * @param RequestStack $requestStack The RequestStack for accessing the current request.
-     * @param CloudflareTurnstileClientInterface $cloudflareTurnstileClient The HTTP client for making API requests.
-     * @param CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager The error manager which handles or ignore Cloudflare Turnstile HTTP errors.
+     * @param RequestStack $requestStack The RequestStack for accessing the current request
+     * @param CloudflareTurnstileClientInterface $cloudflareTurnstileClient The HTTP client for making API requests
+     * @param CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager The error manager which handles or ignore Cloudflare Turnstile HTTP errors
+     * @param bool $enabled Flag indicating whether the captcha is enabled
      */
-    public function __construct(RequestStack $requestStack, CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager, CloudflareTurnstileClientInterface $cloudflareTurnstileClient)
+    public function __construct(RequestStack $requestStack, CloudflareTurnstileErrorManager $cloudflareTurnstileErrorManager, CloudflareTurnstileClientInterface $cloudflareTurnstileClient, bool $enabled)
     {
         $this->requestStack = $requestStack;
         $this->errorManager = $cloudflareTurnstileErrorManager;
         $this->client = $cloudflareTurnstileClient;
+        $this->enabled = $enabled;
     }
 
     /**
@@ -53,6 +59,10 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
     {
         if (!$constraint instanceof CloudflareTurnstileCaptcha) {
             throw new UnexpectedTypeException($constraint, CloudflareTurnstileCaptcha::class);
+        }
+
+        if (!$this->enabled) {
+            return;
         }
 
         try {

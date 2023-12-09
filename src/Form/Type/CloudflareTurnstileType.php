@@ -15,15 +15,18 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 class CloudflareTurnstileType extends AbstractType
 {
     private string $sitekey;
+    private bool $enabled;
 
     /**
      * TurnstileType constructor
      *
      * @param string $sitekey The Cloudflare Turnstile sitekey for captcha integration
+     * @param bool $enabled Flag indicating whether the captcha is enabled
      */
-    public function __construct(string $sitekey)
+    public function __construct(string $sitekey, bool $enabled)
     {
         $this->sitekey = $sitekey;
+        $this->enabled = $enabled;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -45,6 +48,7 @@ class CloudflareTurnstileType extends AbstractType
     {
         $view->vars['attr']['class'] = trim(isset($options['attr']['class']) ? (preg_match("/\bcf-turnstile\b/", $options['attr']['class']) ? $options['attr']['class'] : 'cf-turnstile ' . trim($options['attr']['class'])) : 'cf-turnstile');
         $view->vars['sitekey'] = $this->sitekey;
+        $view->vars['enabled'] = $this->enabled;
     }
 
     public function getBlockPrefix(): string

@@ -7,6 +7,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,6 +33,7 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
     private CloudflareTurnstileErrorManager $errorManager;
     private RequestStack $mockedRequestStack;
     private string $mockedValidationResponse;
+    private bool $enabled;
 
     /**
      * Initializes default properties for the test and the validator :
@@ -47,6 +49,7 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
         $this->mockedRequestStack = new RequestStack();
         $this->mockedRequestStack->push(new Request());
         $this->mockedValidationResponse = json_encode([]); // @phpstan-ignore-line
+        $this->enabled = true;
 
         parent::setUp();
     }
@@ -58,7 +61,7 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
      */
     protected function createValidator(): CloudflareTurnstileCaptchaValidator
     {
-        $this->validator = new CloudflareTurnstileCaptchaValidator($this->mockedRequestStack, $this->errorManager, new CloudflareTurnstileClient(new MockHttpClient(new MockResponse($this->mockedValidationResponse)), '', []));
+        $this->validator = new CloudflareTurnstileCaptchaValidator($this->mockedRequestStack, $this->errorManager, new CloudflareTurnstileClient(new MockHttpClient(new MockResponse($this->mockedValidationResponse)), '', []), $this->enabled);
         $this->context = $this->createContext();
         $this->validator->initialize($this->context);
 
@@ -75,7 +78,7 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
      */
     protected function createValidatorWithCustomClient(CloudflareTurnstileClientInterface $client): CloudflareTurnstileCaptchaValidator
     {
-        $this->validator = new CloudflareTurnstileCaptchaValidator($this->mockedRequestStack, $this->errorManager, $client);
+        $this->validator = new CloudflareTurnstileCaptchaValidator($this->mockedRequestStack, $this->errorManager, $client, $this->enabled);
         $this->context = $this->createContext();
         $this->validator->initialize($this->context);
 
@@ -110,8 +113,20 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
         $this->validator->validate('', new CloudflareTurnstileCaptcha());
 
         $this->buildViolation('rejected_captcha')->assertRaised();
+    }
 
-        $violations = $this->context->getViolations();
+    public function testCaptchaValidationIsIgnoredWhenDisabled(): void
+    {
+        $this->enabled = false;
+
+        $mockedClient = $this->createMock(CloudflareTurnstileClientInterface::class);
+        $mockedClient->method('verify')
+            ->willThrowException(new CloudflareTurnstileApiException(__METHOD__));
+
+        $this->validator = $this->createValidatorWithCustomClient($mockedClient);
+        $this->validator->validate('', new CloudflareTurnstileCaptcha());
+
+        $this->assertNoViolation();
     }
 
     public function testInvalidCaptchaConstraintThrowsException(): void

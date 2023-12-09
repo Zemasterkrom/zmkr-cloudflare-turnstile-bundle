@@ -21,6 +21,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     private ZmkrCloudflareTurnstileExtension $extension;
     private ContainerBuilder $containerBuilder;
 
+    private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.enabled';
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
     private const ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure';
@@ -45,12 +46,14 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->assertSame($typeDefinition->getClass(), CloudflareTurnstileType::class);
         $this->assertSame($typeDefinition->getArgument('$sitekey'), $this->getVariablePlaceholder(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame($typeDefinition->getArgument('$enabled'), $this->getVariablePlaceholder(self::ENABLED_FLAG_REFERENCE));
 
         $validatorDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.validator');
 
         $this->assertSame($validatorDefinition->getClass(), CloudflareTurnstileCaptchaValidator::class);
         $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileErrorManager')->__toString(), 'zmkr_cloudflare_turnstile.services.error_manager');
         $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileClient')->__toString(), CloudflareTurnstileClientInterface::class);
+        $this->assertSame($validatorDefinition->getArgument('$enabled'),  $this->getVariablePlaceholder(self::ENABLED_FLAG_REFERENCE));
 
         $errorManagerDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.error_manager');
 
@@ -102,6 +105,39 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
+        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
+        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
+        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
+        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+    }
+
+    public function testLoadingWithRequiredConfigAndDisabledFlag(): void
+    {
+        $this->extension->load([[
+            'enabled' => false,
+            'captcha' => [
+                'sitekey' => '<sitekey>',
+                'secret_key' => '<secret_key>'
+            ]
+        ]], $this->containerBuilder);
+
+        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), false);
+        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
+        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
+        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+    }
+
+    public function testLoadingWithRequiredConfigAndEnabledFlag(): void
+    {
+        $this->extension->load([[
+            'enabled' => true,
+            'captcha' => [
+                'sitekey' => '<sitekey>',
+                'secret_key' => '<secret_key>'
+            ]
+        ]], $this->containerBuilder);
+
+        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);

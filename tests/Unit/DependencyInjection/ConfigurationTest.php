@@ -68,6 +68,15 @@ class ConfigurationTest extends TestCase
         ]]);
     }
 
+    public function testProcessorWithInvalidEnabledFlagThrowsException(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->processor->processConfiguration($this->configuration, [[
+            'enabled' => null
+        ]]);
+    }
+
     public function testProcessorWithEmptySitekeyThrowsException(): void
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -135,6 +144,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -160,6 +170,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -187,6 +198,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -212,6 +224,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -239,6 +252,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -268,6 +282,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -300,6 +315,7 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
+                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>'
@@ -312,6 +328,58 @@ class ConfigurationTest extends TestCase
                         'timeout' => 1,
                         'max_duration' => 2
                     ]
+                ]
+            ]
+        ];
+
+        // Enabled extension
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'enabled' => true,
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ]
+                ]
+            ],
+            [
+                'enabled' => true,
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
+                ],
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
+                ]
+            ]
+        ];
+
+        // Disabled extension
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'enabled' => false,
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>'
+                    ]
+                ]
+            ],
+            [
+                'enabled' => false,
+                'captcha' => [
+                    'sitekey' => '<sitekey>',
+                    'secret_key' => '<secret_key>'
+                ],
+                'error_manager' => [
+                    'throw_on_core_failure' => false
+                ],
+                'http_client' => [
+                    'options' => []
                 ]
             ]
         ];
