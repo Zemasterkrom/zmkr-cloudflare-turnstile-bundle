@@ -18,13 +18,13 @@ return function (ContainerConfigurator $configurator) {
     $services->set('zmkr_cloudflare_turnstile.services.type', CloudflareTurnstileType::class)
         ->tag('form.type')
         ->arg('$sitekey', '%zmkr_cloudflare_turnstile.parameters.captcha.sitekey%')
-        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.enabled%');
+        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%');
 
     $services->set('zmkr_cloudflare_turnstile.services.validator', CloudflareTurnstileCaptchaValidator::class)
         ->tag('validator.constraint_validator')
         ->arg('$cloudflareTurnstileErrorManager', new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.error_manager'))
         ->arg('$cloudflareTurnstileClient', new ReferenceConfigurator(CloudflareTurnstileClientInterface::class))
-        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.enabled%');
+        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%');
 
     $services->set('zmkr_cloudflare_turnstile.services.error_manager', CloudflareTurnstileErrorManager::class)
         ->arg('$throwOnCoreFailure', '%zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure%');

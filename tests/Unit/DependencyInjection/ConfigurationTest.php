@@ -144,10 +144,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -170,10 +170,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -198,10 +198,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => true
@@ -224,10 +224,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -252,10 +252,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -282,10 +282,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -315,10 +315,10 @@ class ConfigurationTest extends TestCase
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -336,18 +336,18 @@ class ConfigurationTest extends TestCase
         yield [
             [
                 'zmkr_cloudflare_turnstile' => [
-                    'enabled' => true,
                     'captcha' => [
                         'sitekey' => '<sitekey>',
-                        'secret_key' => '<secret_key>'
+                        'secret_key' => '<secret_key>',
+                        'enabled' => true
                     ]
                 ]
             ],
             [
-                'enabled' => true,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => true
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false
@@ -362,18 +362,18 @@ class ConfigurationTest extends TestCase
         yield [
             [
                 'zmkr_cloudflare_turnstile' => [
-                    'enabled' => false,
                     'captcha' => [
                         'sitekey' => '<sitekey>',
-                        'secret_key' => '<secret_key>'
+                        'secret_key' => '<secret_key>',
+                        'enabled' => false
                     ]
                 ]
             ],
             [
-                'enabled' => false,
                 'captcha' => [
                     'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>'
+                    'secret_key' => '<secret_key>',
+                    'enabled' => false
                 ],
                 'error_manager' => [
                     'throw_on_core_failure' => false

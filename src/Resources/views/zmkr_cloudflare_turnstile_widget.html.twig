@@ -1,6 +1,8 @@
 {% block zmkr_cloudflare_turnstile_widget %}
     {%- if enabled -%}
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+        {%- set query_parameters = explicit_js_loader is not empty ? '?onload=' ~ explicit_js_loader : '' -%}
+
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
         <div {%- for attr_name, attr_value in attr -%}
             {{- ' ' -}}
             {{- attr_name -}}="{{ attr_value }}"

@@ -31,9 +31,13 @@ class CloudflareTurnstileType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
+
         $resolver->setDefaults([
+            'explicit_js_loader' => '',
+            'invalid_message' => $cloudflareTurnstileCaptchaConstraint->message,
             'mapped' => false,
-            'constraints' => new CloudflareTurnstileCaptcha()
+            'constraints' => $cloudflareTurnstileCaptchaConstraint
         ]);
     }
 
@@ -48,6 +52,7 @@ class CloudflareTurnstileType extends AbstractType
     {
         $view->vars['attr']['class'] = trim(isset($options['attr']['class']) ? (preg_match("/\bcf-turnstile\b/", $options['attr']['class']) ? $options['attr']['class'] : 'cf-turnstile ' . trim($options['attr']['class'])) : 'cf-turnstile');
         $view->vars['sitekey'] = $this->sitekey;
+        $view->vars['explicit_js_loader'] = $options['explicit_js_loader'];
         $view->vars['enabled'] = $this->enabled;
     }
 

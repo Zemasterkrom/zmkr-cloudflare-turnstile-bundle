@@ -4,16 +4,16 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Validator;
 
 use DG\BypassFinals;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
-use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
@@ -104,6 +104,52 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
 
     public function testUnsuccessfulCaptchaValidation(): void
     {
+        /** @phpstan-ignore-next-line */
+        $this->mockedValidationResponse = json_encode([
+            'success' => false
+        ]);
+
+        $this->validator = $this->createValidator();
+        $this->validator->validate('', new CloudflareTurnstileCaptcha());
+
+        $this->buildViolation('rejected_captcha')->assertRaised();
+    }
+
+    public function testUnsuccessfulCaptchaValidationWithInvalidMessageOption(): void
+    {
+        $formBuilder = $this->createMock(FormBuilderInterface::class);
+        $formBuilder->method('getOption')
+            ->willReturn('invalid_message');
+
+        $form = $this->createMock(FormInterface::class);
+        $form->method('getConfig')
+            ->willReturn($formBuilder);
+
+        $this->object = $form;
+
+        /** @phpstan-ignore-next-line */
+        $this->mockedValidationResponse = json_encode([
+            'success' => false
+        ]);
+
+        $this->validator = $this->createValidator();
+        $this->validator->validate('', new CloudflareTurnstileCaptcha());
+
+        $this->buildViolation('invalid_message')->assertRaised();
+    }
+
+    public function testUnsuccessfulCaptchaValidationWithUndefinedInvalidMessageReturnsDefault(): void
+    {
+        $formBuilder = $this->createMock(FormBuilderInterface::class);
+        $formBuilder->method('getOption')
+            ->willReturn(null);
+
+        $form = $this->createMock(FormInterface::class);
+        $form->method('getConfig')
+            ->willReturn($formBuilder);
+
+        $this->object = $form;
+
         /** @phpstan-ignore-next-line */
         $this->mockedValidationResponse = json_encode([
             'success' => false

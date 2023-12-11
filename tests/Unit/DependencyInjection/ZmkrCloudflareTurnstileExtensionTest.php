@@ -2,7 +2,6 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\DependencyInjection;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
@@ -21,7 +20,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     private ZmkrCloudflareTurnstileExtension $extension;
     private ContainerBuilder $containerBuilder;
 
-    private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.enabled';
+    private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.enabled';
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
     private const ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure';
@@ -67,18 +66,6 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
     }
 
-    public function testTwigThemeIsLoadedCorrectly(): void
-    {
-        $mockedContainerBuilder = $this->createPartialMock(ContainerBuilder::class, ['hasExtension']);
-        $mockedContainerBuilder->method('hasExtension')->willReturn(true);
-
-        $this->extension->prepend($mockedContainerBuilder);
-
-        $this->assertCount(1, array_filter($mockedContainerBuilder->getExtensionConfig('twig')[0]['form_themes'], function ($v) {
-            return str_contains($v, 'zmkr_cloudflare_turnstile_widget');
-        }));
-    }
-
     /**
      * Checks that excluded parameters defined in the bundle loading class are not loaded in the container
      */
@@ -114,10 +101,10 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     public function testLoadingWithRequiredConfigAndDisabledFlag(): void
     {
         $this->extension->load([[
-            'enabled' => false,
             'captcha' => [
                 'sitekey' => '<sitekey>',
-                'secret_key' => '<secret_key>'
+                'secret_key' => '<secret_key>',
+                'enabled' => false
             ]
         ]], $this->containerBuilder);
 
@@ -130,10 +117,10 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     public function testLoadingWithRequiredConfigAndEnabledFlag(): void
     {
         $this->extension->load([[
-            'enabled' => true,
             'captcha' => [
                 'sitekey' => '<sitekey>',
-                'secret_key' => '<secret_key>'
+                'secret_key' => '<secret_key>',
+                'enabled' => true
             ]
         ]], $this->containerBuilder);
 

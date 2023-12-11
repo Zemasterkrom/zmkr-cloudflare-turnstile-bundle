@@ -4,7 +4,6 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Form\Type;
 
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Component\Form\FormRenderer;
-use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Twig\Environment;
@@ -57,13 +56,23 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $this->assertTrue($form->getConfig()->getOptions()['constraints'] instanceof CloudflareTurnstileCaptcha);
     }
 
-    public function testCaptchaFormTypeVarsAreCorrect(): void
+    public function testCaptchaDefaultFormTypeVars(): void
     {
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['sitekey']);
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
+        $this->assertEmpty($formView->vars['explicit_js_loader']);
         $this->assertTrue($formView->vars['enabled']);
+    }
+
+    public function testCaptchaExplicitRenderingModeFlag(): void
+    {
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'explicit_js_loader' => 'cloudflareTurnstileLoader'
+        ])->createView();
+
+        $this->assertSame('cloudflareTurnstileLoader', $formView->vars['explicit_js_loader']);
     }
 
     public function testCaptchaFormTypeEnabledFlagOnDisabledState(): void
@@ -72,6 +81,22 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertFalse($formView->vars['enabled']);
+    }
+
+    public function testCaptchaRenderingWithImplicitMode(): void
+    {
+        $form = $this->factory->create(CloudflareTurnstileType::class, null);
+
+        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
+    }
+
+    public function testCaptchaRenderingWithExplicitMode(): void
+    {
+        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'explicit_js_loader' => 'cloudflareTurnstileLoader'
+        ]);
+
+        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js\?onload=cloudflareTurnstileLoader#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
     }
 
     /**

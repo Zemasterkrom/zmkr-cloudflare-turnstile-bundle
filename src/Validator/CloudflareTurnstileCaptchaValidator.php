@@ -2,17 +2,12 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 
-use Exception;
-use PHPStan\Symfony\Parameter;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Zemasterkrom\CloudflareTurnstileBundle\Adapter\ParameterBagAdapter;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiException;
@@ -65,14 +60,21 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
             return;
         }
 
+        $violationMessage = $constraint->message;
+        $form = $this->context->getObject();
+
+        if ($form instanceof FormInterface) {
+            $violationMessage = $form->getConfig()->getOption('invalid_message') ?? $violationMessage;
+        }
+
         try {
             $captchaResponseToken = $this->getProvidedCaptchaResponseToken();
 
             if (!$this->client->verify($captchaResponseToken)) {
-                $this->context->buildViolation($constraint->message)->addViolation();
+                $this->context->buildViolation($violationMessage)->addViolation();
             }
         } catch (CloudflareTurnstileException $e) {
-            $this->context->buildViolation($constraint->message)->addViolation();
+            $this->context->buildViolation($violationMessage)->addViolation();
             $this->errorManager->throwIfExplicitErrorsEnabled($e);
         }
     }
