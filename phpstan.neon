@@ -8,8 +8,8 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     checkGenericClassInNonGenericObjectType: true # The issue is that template annotations are not present in the utility test classes of earlier versions
     ignoreErrors:
-        - "#test.* has parameter .* with no value type specified in iterable type#"
-        - "#test.* has parameter .* with no type specified#"
-        - "#Test::.* return type has no value type specified in iterable type#"
+        - "#Test.* has parameter .* with no value type specified in iterable type#"
+        - "#Test.* has parameter .* with no type specified#"
+        - "#Test.* type has no value type specified in iterable type#"
         - "#Test extends generic class .* but does not specify its types#"
 

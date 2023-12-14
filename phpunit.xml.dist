@@ -13,6 +13,7 @@
         <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
         <server name="APP_ENV" value="test"/>
         <server name="APP_DEBUG" value="true"/>
+        <server name="PANTHER_WEB_SERVER_DIR" value="." />
 
         <!-- ###+ symfony/framework-bundle ### -->
         <env name="APP_ENV" value="dev"/>
@@ -20,14 +21,19 @@
         <!-- ###- symfony/framework-bundle ### -->
     </php>
     <testsuites>
+        <testsuite name="Unit">
+            <directory suffix=".php">
+                ./tests/Unit
+            </directory>
+        </testsuite>
         <testsuite name="Integration">
             <directory suffix=".php">
                 ./tests/Integration
             </directory>
         </testsuite>
-        <testsuite name="Unit">
+        <testsuite name="Functional">
             <directory suffix=".php">
-                ./tests/Unit
+                ./tests/Functional
             </directory>
         </testsuite>
     </testsuites>

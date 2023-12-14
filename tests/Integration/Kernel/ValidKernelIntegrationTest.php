@@ -1,9 +1,9 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Integration\Kernel;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Kernel;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zemasterkrom\CloudflareTurnstileBundle\Tests\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
 
 /**
  * Integration test class that asserts that the bundle can start with required bundles
@@ -17,12 +17,12 @@ class ValidKernelIntegrationTest extends KernelTestCase
         self::bootKernel();
     }
 
-    public static function getKernelClass(): string
+    protected static function getKernelClass(): string
     {
         return ValidBundleTestingKernel::class;
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         static::$class = null;

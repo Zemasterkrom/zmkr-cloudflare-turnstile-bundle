@@ -2,10 +2,23 @@
     {%- if enabled -%}
         {%- set query_parameters = explicit_js_loader is not empty ? '?onload=' ~ explicit_js_loader : '' -%}
 
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
-        <div {%- for attr_name, attr_value in attr -%}
-            {{- ' ' -}}
-            {{- attr_name -}}="{{ attr_value }}"
-        {%- endfor %} data-sitekey="{{ sitekey }}"></div>
+        <div id="{{ id }}_container">
+            {%- if required -%}
+                <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.1.js' )}}"></script>
+            {%- endif -%}
+
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
+            <div id="{{ id }}" data-sitekey="{{ sitekey }}" {%- for attrname, attrvalue in attr -%}
+                {%- if attrvalue is not same as(false) -%}
+                    {{- " " -}}
+                {%- endif -%}
+
+                {%- if attrvalue is same as(true) -%}
+                    {{- attrname }}="{{ attrname }}"
+                {%- elseif attrvalue is not same as(false) -%}
+                    {{- attrname }}="{{ attrvalue }}"
+                {%- endif -%}
+            {%- endfor -%}></div>
+        </div>
     {%- endif -%}
 {% endblock %}

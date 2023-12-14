@@ -47,7 +47,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: none, curl, mbstring, xml, simplexml, xmlwriter, dom, tokenizer, json
+          extensions: none, curl, mbstring, xml, simplexml, xmlwriter, dom, tokenizer, json, zip, sockets
+          coverage: xdebug
+
+      - name: Check Composer package description
+        run: composer validate --strict
 
       - name: Symfony version auto-configuration
         run: |
@@ -55,13 +59,22 @@ jobs:
           composer global config --no-plugins allow-plugins.symfony/flex true
           composer config extra.symfony.require ${{ matrix.symfony }}
 
-      - name: Check Composer package description
-        run: composer validate --strict
+      - name: Generate Composer dependencies lock file
+        run: composer update --no-install --prefer-stable
 
       - name: Install Composer dependencies
         uses: ramsey/composer-install@v2
+
+      - name: Install required Firefox libraries
+        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 -y
+
+      - name: Install Firefox browser
+        uses: browser-actions/setup-firefox@v1
         with:
-          composer-options: --prefer-stable
+          firefox-version: 91.0
+
+      - name: Install Firefox drivers
+        run: vendor/bin/bdi detect drivers
 
       - name: Run PHPUnit tests
         run: composer phpunit
@@ -81,13 +94,25 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
-          extensions: none, curl, mbstring, xml, simplexml, xmlwriter, dom, tokenizer, json
+          extensions: none, curl, mbstring, xml, simplexml, xmlwriter, dom, tokenizer, json, zip, sockets
           coverage: xdebug
+
+      - name: Generate Composer dependencies lock file
+        run: composer update --no-install --prefer-stable
 
       - name: Install Composer dependencies
         uses: ramsey/composer-install@v2
+
+      - name: Install required Firefox libraries
+        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 -y
+
+      - name: Install Firefox browser
+        uses: browser-actions/setup-firefox@v1
         with:
-          composer-options: --prefer-stable
+          firefox-version: 91.0
+
+      - name: Install Firefox drivers
+        run: vendor/bin/bdi detect drivers
 
       - name: Run PHPUnit tests with coverage report
         run: composer phpunit -- --coverage-clover ./coverage.xml

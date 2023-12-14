@@ -1,37 +1,30 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Form\Type;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Form\Type;
 
-use Symfony\Bridge\Twig\Form\TwigRendererEngine;
-use Symfony\Component\Form\FormRenderer;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
- * Class that tests Cloudflare Turnstile form field and its rendering.
+ * Test class asserting that Cloudflare Turnstile form field data is consistent and
  */
 class CloudflareTurnstileTypeTest extends TypeTestCase
 {
-    private FormRenderer $formRenderer;
     private CloudflareTurnstileType $type;
 
     const CAPTCHA_SITEKEY = 'sitekey';
 
     public function setUp(): void
     {
-        $this->formRenderer = new FormRenderer(new TwigRendererEngine([
-            'zmkr_cloudflare_turnstile_widget.html.twig'
-        ], new Environment(
-            new FilesystemLoader([
-                __DIR__ . '/../../../../src/Resources/views'
-            ])
-        )));
-
         $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, true));
+    }
+
+    private function initializeFormTypeFactory(CloudflareTurnstileType $type): void
+    {
+        $this->type = $type;
+        parent::setUp();
     }
 
     protected function getExtensions(): array
@@ -41,12 +34,6 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
                 $this->type
             ], [])
         ];
-    }
-
-    private function initializeFormTypeFactory(CloudflareTurnstileType $type): void
-    {
-        $this->type = $type;
-        parent::setUp();
     }
 
     public function testCaptchaConstraintIsLoaded(): void
@@ -75,28 +62,12 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $this->assertSame('cloudflareTurnstileLoader', $formView->vars['explicit_js_loader']);
     }
 
-    public function testCaptchaFormTypeEnabledFlagOnDisabledState(): void
+    public function testCaptchaFormTypeDisabledFlag(): void
     {
         $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, false));
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertFalse($formView->vars['enabled']);
-    }
-
-    public function testCaptchaRenderingWithImplicitMode(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class, null);
-
-        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
-    }
-
-    public function testCaptchaRenderingWithExplicitMode(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
-            'explicit_js_loader' => 'cloudflareTurnstileLoader'
-        ]);
-
-        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js\?onload=cloudflareTurnstileLoader#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
     }
 
     /**
@@ -120,7 +91,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
      *
      * @dataProvider classesWithTurnstileClass
      */
-    public function testTurnstileClassIsNotDuplicatedIfListedInProvidedClasses(string $providedClass, string $expectedClass): void
+    public function testTurnstileClassIsNotDuplicatedIfAlreadyListedInProvidedClasses(string $providedClass, string $expectedClass): void
     {
         $form = $this->factory->create(CloudflareTurnstileType::class, null, [
             'attr' => [
@@ -140,45 +111,6 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         $this->assertSame($responseToken, $form->getData());
         $this->assertTrue($form->isSynchronized());
-    }
-
-    public function testCaptchaFormTypeIsNotRenderedIfDisabled(): void
-    {
-        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, false));
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-
-        $this->assertEmpty($this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
-    }
-
-    public function testCaptchaFormTypeRenderingWithNoAttributes(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-
-        $this->assertMatchesRegularExpression('#<div class="cf-turnstile" data-sitekey="sitekey"></div>#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
-    }
-
-    public function testCaptchaRenderingWithAddedClasses(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
-            'attr' => [
-                'class' => '  test test2  '
-            ]
-        ]);
-
-        $this->assertMatchesRegularExpression('#<div class="cf-turnstile test test2" data-sitekey="sitekey"></div>#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
-    }
-
-    public function testCaptchaRenderingWithMultipleAttributes(): void
-    {
-        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
-            'attr' => [
-                'class' => '  test test2  ',
-                'title' => 'Cloudflare Turnstile Captcha',
-                'id' => 'turnstile'
-            ]
-        ]);
-
-        $this->assertMatchesRegularExpression('#<div class="cf-turnstile test test2" title="Cloudflare Turnstile Captcha" id="turnstile" data-sitekey="sitekey"></div>#', $this->formRenderer->searchAndRenderBlock($form->createView(), 'widget'));
     }
 
     public function classesWithoutTurnstileClass(): iterable

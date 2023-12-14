@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Unit\Validator;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Validator;
 
 use DG\BypassFinals;
 use PHPUnit\Framework\MockObject\MockObject;

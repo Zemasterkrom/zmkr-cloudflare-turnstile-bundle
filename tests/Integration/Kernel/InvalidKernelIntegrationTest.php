@@ -1,10 +1,10 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Tests\Integration\Kernel;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Kernel;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Zemasterkrom\CloudflareTurnstileBundle\Tests\Integration\InvalidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\InvalidBundleTestingKernel;
 
 /**
  * Integration test class that asserts that the bundle cannot start without the Twig Bundle
@@ -18,12 +18,12 @@ class InvalidKernelIntegrationTest extends KernelTestCase
         self::bootKernel();
     }
 
-    public static function getKernelClass(): string
+    protected static function getKernelClass(): string
     {
         return InvalidBundleTestingKernel::class;
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         static::$class = null;

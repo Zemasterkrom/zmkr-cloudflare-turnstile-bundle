@@ -36,6 +36,7 @@ class CloudflareTurnstileType extends AbstractType
         $resolver->setDefaults([
             'explicit_js_loader' => '',
             'invalid_message' => $cloudflareTurnstileCaptchaConstraint->message,
+            'required' => true,
             'mapped' => false,
             'constraints' => $cloudflareTurnstileCaptchaConstraint
         ]);
@@ -54,6 +55,7 @@ class CloudflareTurnstileType extends AbstractType
         $view->vars['sitekey'] = $this->sitekey;
         $view->vars['explicit_js_loader'] = $options['explicit_js_loader'];
         $view->vars['enabled'] = $this->enabled;
+        $view->vars['required'] = $options['required'];
     }
 
     public function getBlockPrefix(): string

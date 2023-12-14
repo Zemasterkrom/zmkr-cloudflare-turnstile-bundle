@@ -11,3 +11,4 @@ composer.lock
 # PHPUnit
 .phpunit.result.cache
 /coverage*/
+/drivers/
