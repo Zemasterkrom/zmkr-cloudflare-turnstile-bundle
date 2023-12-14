@@ -71,7 +71,7 @@ jobs:
       - name: Install Firefox browser
         uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: 91.0
+          firefox-version: "91.0"
 
       - name: Install Firefox drivers
         run: vendor/bin/bdi detect drivers
@@ -109,7 +109,7 @@ jobs:
       - name: Install Firefox browser
         uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: 91.0
+          firefox-version: "91.0"
 
       - name: Install Firefox drivers
         run: vendor/bin/bdi detect drivers
