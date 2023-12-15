@@ -56,7 +56,7 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
     }
 
     /**
-     * Integrates the Twig view associated to the Cloudflare Turnstile captcha
+     * Integrates the Twig view associated to the Cloudflare Turnstile captcha widget
      *
      * @param ContainerBuilder $containerBuilder Builder of container definitions
      *
