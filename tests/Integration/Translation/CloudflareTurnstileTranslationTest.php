@@ -5,6 +5,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Translation;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
  * Integration test class that checks that Cloudflare Turnstile error message translation is working properly
@@ -21,7 +22,16 @@ class CloudflareTurnstileTranslationTest extends KernelTestCase
 
     public function testBundleTranslation(): void
     {
-        $this->assertNotEquals('rejected_captcha', $this->translator->trans('rejected_captcha', [], 'validators'));
+        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
+
+        $this->assertNotEquals($cloudflareTurnstileCaptchaConstraint->message, $this->translator->trans($cloudflareTurnstileCaptchaConstraint->message, [], 'validators'));
+    }
+
+    public function testBundleTranslationWithSpecificLocale(): void
+    {
+        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
+
+        $this->assertNotEquals($cloudflareTurnstileCaptchaConstraint->message, $this->translator->trans($cloudflareTurnstileCaptchaConstraint->message, [], 'validators', 'ar'));
     }
 
     protected static function getKernelClass(): string

@@ -8,7 +8,7 @@ class CloudflareTurnstileCaptcha extends Constraint
 {
     const DEFAULT_RESPONSE_FIELD_NAME = 'cf-turnstile-response';
 
-    public string $message = 'rejected_captcha';
+    public string $message = 'zmkr_cloudflare_turnstile.rejected_captcha';
     public string $responseFieldName = self::DEFAULT_RESPONSE_FIELD_NAME;
 
     public function __construct(?string $message = null, ?string $responseFieldName = null, $options = null, ?array $groups = null, $payload = null)

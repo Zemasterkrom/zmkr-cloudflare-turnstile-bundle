@@ -61,13 +61,14 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
     public function testCaptchaDefaultFormTypeVars(): void
     {
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
+        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
 
         $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['sitekey']);
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
         $this->assertEmpty($formView->vars['explicit_js_loader']);
         $this->assertTrue($formView->vars['enabled']);
-        $this->assertSame($formView->vars['response_field_name'], 'cf-turnstile-response');
-        $this->assertSame($formView->vars['attr']['data-response-field-name'], 'cf-turnstile-response');
+        $this->assertSame($formView->vars['response_field_name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
+        $this->assertSame($formView->vars['attr']['data-response-field-name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
     }
 
     public function testCaptchaExplicitRenderingModeFlag(): void
