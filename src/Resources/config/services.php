@@ -18,6 +18,7 @@ return function (ContainerConfigurator $configurator) {
     $services->set('zmkr_cloudflare_turnstile.services.type', CloudflareTurnstileType::class)
         ->tag('form.type')
         ->arg('$sitekey', '%zmkr_cloudflare_turnstile.parameters.captcha.sitekey%')
+        ->arg('$explicitJsLoader', '%zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader%')
         ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%');
 
     $services->set('zmkr_cloudflare_turnstile.services.validator', CloudflareTurnstileCaptchaValidator::class)

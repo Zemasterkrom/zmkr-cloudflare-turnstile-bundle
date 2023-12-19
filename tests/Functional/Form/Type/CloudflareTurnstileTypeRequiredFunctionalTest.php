@@ -3,7 +3,6 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\Form\Type;
 
 use Facebook\WebDriver\Exception\JavascriptErrorException;
-use ReflectionClass;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\PantherTestCase;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
@@ -33,9 +32,6 @@ class CloudflareTurnstileTypeRequiredFunctionalTest extends PantherTestCase
         /** @var string */
         $widgetHandlerJavascriptFunctions = preg_replace("/^[^\s].+[(].*[)];*$/m", '', $javascriptWidgetHandler);
 
-        /** @var string */
-        $widgetHandlerJavascriptFunctions = preg_replace("/^\s*function\s+(\w+)\s*\(([^)]*)\)\s*{/m", "window.$1 = function ($2) {", $widgetHandlerJavascriptFunctions);
-
         $this->client = static::createPantherClient([
             'browser' => static::FIREFOX,
             'port' => $this->getAvailablePort()
@@ -43,6 +39,7 @@ class CloudflareTurnstileTypeRequiredFunctionalTest extends PantherTestCase
             'port' => $this->getAvailablePort()
         ]);
         $this->client->start();
+
         $this->client->executeScript($widgetHandlerJavascriptFunctions);
         $this->client->executeScript(<<<EOF
             let title = document.createElement('h1');
@@ -79,94 +76,139 @@ EOF);
 
     private function getShortClassName(): string
     {
-        return (new ReflectionClass($this))->getShortName();
+        return (new \ReflectionClass($this))->getShortName();
     }
 
-    private function getDocumentBodyHtml(): string
+    private function getDocumentBodyHtml(): ?string
     {
         return $this->client->executeScript('return document.body.innerHTML;');
     }
 
-    public function testWidgetHandlerExecutionWithoutFormThrowsException(): void
+    public function testCaptchaRequiredModeWithoutFormThrowsException(): void
     {
         $this->expectException(JavascriptErrorException::class);
 
-        $this->client->executeScript("registerRequiredHandler();");
+        $this->client->executeScript("window.zmkrCloudflareTurnstileBundleCaptcha.required();");
     }
 
-    public function testWidgetHandlerExecutionWithFormSucceeds(): void
-    {
-        $this->client->executeScript("registerRequiredHandler(document.createElement('form'));");
-        $this->assertNotEmpty($this->getDocumentBodyHtml());
-    }
-
-    public function testWidgetHandlerExecutionWithoutCaptchaResponsePreventsSubmission(): void
+    public function testCaptchaRequiredModeWithFormSucceeds(): void
     {
         $this->client->executeScript(<<<EOF
-            let widgetContainerWithoutCaptchaResponse = document.createElement('form');
-            widgetContainerWithoutCaptchaResponse.setAttribute('action', 'about:blank');
-            widgetContainerWithoutCaptchaResponse.setAttribute('method', 'GET');
+            let form = document.createElement('form');
 
-            let submitButton = document.createElement('input');
-            submitButton.setAttribute('type', 'submit');
-            submitButton.setAttribute('value', 'Submit');
+            document.body.append(form);
 
-            widgetContainerWithoutCaptchaResponse.append(submitButton);
-            document.body.append(widgetContainerWithoutCaptchaResponse);
-
-            registerRequiredHandler(widgetContainerWithoutCaptchaResponse.childNodes[0]);
-            submitButton.click();
+            window.zmkrCloudflareTurnstileBundleCaptcha.required(form);
 EOF);
         $this->assertNotEmpty($this->getDocumentBodyHtml());
     }
 
-    public function testWidgetHandlerExecutionWithEmptyCaptchaResponsePreventsSubmission(): void
+    public function testCaptchaRequiredModeWithFormOnChildNodeSucceeds(): void
     {
         $this->client->executeScript(<<<EOF
-            let widgetContainerWithEmptyCaptchaResponse = document.createElement('form');
-            widgetContainerWithEmptyCaptchaResponse.setAttribute('action', 'about:blank');
-            widgetContainerWithEmptyCaptchaResponse.setAttribute('method', 'GET');
+            let formWithChildNode = document.createElement('form');
+            formWithChildNode.append(document.createElement('div'));
 
-            let emptyCaptchaResponse = document.createElement('input');
-            emptyCaptchaResponse.setAttribute('type', 'hidden');
-            emptyCaptchaResponse.setAttribute('name', 'cf-turnstile');
+            document.body.append(formWithChildNode);
 
-            let submitButton = document.createElement('input');
-            submitButton.setAttribute('type', 'submit');
-            submitButton.setAttribute('value', 'Submit');
-
-            widgetContainerWithEmptyCaptchaResponse.append(emptyCaptchaResponse);
-            widgetContainerWithEmptyCaptchaResponse.append(submitButton);
-            document.body.append(widgetContainerWithEmptyCaptchaResponse);
-
-            registerRequiredHandler(widgetContainerWithEmptyCaptchaResponse.childNodes[0]);
-            submitButton.click();
+            window.zmkrCloudflareTurnstileBundleCaptcha.required(formWithChildNode.childNodes[0]);
 EOF);
         $this->assertNotEmpty($this->getDocumentBodyHtml());
     }
 
-    public function testWidgetHandlerExecutionWithCaptchaResponseApprovesSubmission(): void
+    public function testCaptchaRequiredModeWithoutCaptchaResponsePreventsSubmission(): void
     {
         $this->client->executeScript(<<<EOF
-            let widgetContainerWithCaptchaResponse = document.createElement('form');
-            widgetContainerWithCaptchaResponse.setAttribute('action', 'about:blank');
-            widgetContainerWithCaptchaResponse.setAttribute('method', 'GET');
+                let widgetContainerWithoutCaptchaResponse = document.createElement('form');
+                widgetContainerWithoutCaptchaResponse.setAttribute('action', 'about:blank');
+                widgetContainerWithoutCaptchaResponse.setAttribute('method', 'GET');
 
-            let captchaResponse = document.createElement('input');
-            captchaResponse.setAttribute('type', 'hidden');
-            captchaResponse.setAttribute('name', 'cf-turnstile-response');
-            captchaResponse.setAttribute('value', 'XXX-DUMMY-TOKEN-XXX');
+                let submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', 'Submit');
 
-            let submitButton = document.createElement('input');
-            submitButton.setAttribute('type', 'submit');
-            submitButton.setAttribute('value', 'Submit');
+                widgetContainerWithoutCaptchaResponse.append(submitButton);
+                document.body.append(widgetContainerWithoutCaptchaResponse);
 
-            widgetContainerWithCaptchaResponse.append(captchaResponse);
-            widgetContainerWithCaptchaResponse.append(submitButton);
-            document.body.append(widgetContainerWithCaptchaResponse);
+                window.zmkrCloudflareTurnstileBundleCaptcha.required(widgetContainerWithoutCaptchaResponse.childNodes[0], 'cf-turnstile-response');
+                submitButton.click();
+EOF);
+        $this->assertNotEmpty($this->getDocumentBodyHtml());
+    }
 
-            registerRequiredHandler(widgetContainerWithCaptchaResponse.childNodes[0]);
-            submitButton.click();
+    public function testCaptchaRequiredModeWithEmptyCaptchaResponsePreventsSubmission(): void
+    {
+        $this->client->executeScript(<<<EOF
+                let widgetContainerWithEmptyCaptchaResponse = document.createElement('form');
+                widgetContainerWithEmptyCaptchaResponse.setAttribute('action', 'about:blank');
+                widgetContainerWithEmptyCaptchaResponse.setAttribute('method', 'GET');
+
+                let emptyCaptchaResponse = document.createElement('input');
+                emptyCaptchaResponse.setAttribute('type', 'hidden');
+                emptyCaptchaResponse.setAttribute('name', 'cf-turnstile-response');
+
+                let submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', 'Submit');
+
+                widgetContainerWithEmptyCaptchaResponse.append(emptyCaptchaResponse);
+                widgetContainerWithEmptyCaptchaResponse.append(submitButton);
+                document.body.append(widgetContainerWithEmptyCaptchaResponse);
+
+                window.zmkrCloudflareTurnstileBundleCaptcha.required(widgetContainerWithEmptyCaptchaResponse.childNodes[0], 'cf-turnstile-response');
+                submitButton.click();
+EOF);
+        $this->assertNotEmpty($this->getDocumentBodyHtml());
+    }
+
+    public function testCaptchaRequiredModeWithUnmatchedNameCaptchaResponsePreventsSubmission(): void
+    {
+        $this->client->executeScript(<<<EOF
+                let widgetContainerWithCaptchaResponse = document.createElement('form');
+                widgetContainerWithCaptchaResponse.setAttribute('action', 'about:blank');
+                widgetContainerWithCaptchaResponse.setAttribute('method', 'GET');
+
+                let captchaResponse = document.createElement('input');
+                captchaResponse.setAttribute('type', 'hidden');
+                captchaResponse.setAttribute('name', 'cf-turnstile-response');
+                captchaResponse.setAttribute('value', 'XXX-DUMMY-TOKEN-XXX');
+
+                let submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', 'Submit');
+
+                widgetContainerWithCaptchaResponse.append(captchaResponse);
+                widgetContainerWithCaptchaResponse.append(submitButton);
+                document.body.append(widgetContainerWithCaptchaResponse);
+
+                window.zmkrCloudflareTurnstileBundleCaptcha.required(widgetContainerWithCaptchaResponse.childNodes[0], 'cf-turnstile-test-response');
+                submitButton.click();
+EOF);
+        $this->assertNotEmpty($this->getDocumentBodyHtml());
+    }
+
+    public function testCaptchaRequiredModeWithCaptchaResponseApprovesSubmission(): void
+    {
+        $this->client->executeScript(<<<EOF
+                let widgetContainerWithCaptchaResponse = document.createElement('form');
+                widgetContainerWithCaptchaResponse.setAttribute('action', 'about:blank');
+                widgetContainerWithCaptchaResponse.setAttribute('method', 'GET');
+
+                let captchaResponse = document.createElement('input');
+                captchaResponse.setAttribute('type', 'hidden');
+                captchaResponse.setAttribute('name', 'cf-turnstile-response');
+                captchaResponse.setAttribute('value', 'XXX-DUMMY-TOKEN-XXX');
+
+                let submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', 'Submit');
+
+                widgetContainerWithCaptchaResponse.append(captchaResponse);
+                widgetContainerWithCaptchaResponse.append(submitButton);
+                document.body.append(widgetContainerWithCaptchaResponse);
+
+                window.zmkrCloudflareTurnstileBundleCaptcha.required(widgetContainerWithCaptchaResponse.childNodes[0], 'cf-turnstile-response');
+                submitButton.click();
 EOF);
         $this->client->waitForElementToNotContain('body', $this->getShortClassName());
         $this->assertEmpty($this->getDocumentBodyHtml());

@@ -57,6 +57,7 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
                 )
             )->toArray();
 
+
             return isset($apiResponse['success']) && $apiResponse['success'];
         } catch (HttpClientExceptionInterface $e) {
             throw new CloudflareTurnstileApiException('Unable to call Cloudflare Turnstile API with provided parameters', $e);

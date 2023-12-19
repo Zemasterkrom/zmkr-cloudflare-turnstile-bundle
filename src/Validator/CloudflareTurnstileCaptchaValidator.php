@@ -2,7 +2,6 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Validator;
 
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraint;
@@ -60,21 +59,14 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
             return;
         }
 
-        $violationMessage = $constraint->message;
-        $form = $this->context->getObject();
-
-        if ($form instanceof FormInterface) {
-            $violationMessage = $form->getConfig()->getOption('invalid_message') ?? $violationMessage;
-        }
-
         try {
-            $captchaResponseToken = $this->getProvidedCaptchaResponseToken();
+            $captchaResponseToken = $this->getProvidedCaptchaResponseToken($constraint);
 
             if (!$this->client->verify($captchaResponseToken)) {
-                $this->context->buildViolation($violationMessage)->addViolation();
+                $this->context->buildViolation($constraint->message)->addViolation();
             }
         } catch (CloudflareTurnstileException $e) {
-            $this->context->buildViolation($violationMessage)->addViolation();
+            $this->context->buildViolation($constraint->message)->addViolation();
             $this->errorManager->throwIfExplicitErrorsEnabled($e);
         }
     }
@@ -82,16 +74,18 @@ class CloudflareTurnstileCaptchaValidator extends ConstraintValidator
     /**
      * Returns the Cloudflare Turnstile Captcha token associated to the request
      *
+     * @param CloudflareTurnstileCaptcha $constraint Cloudflare Turnstile Captcha constraint containing final validation parameters including messages
+     *
      * @throws CloudflareTurnstileInvalidResponseException If the incoming request or the provided Cloudflare Turnstile captcha is invalid
      *
      * @return mixed Provided Cloudflare Turnstile Captcha response token, which should normally be a string if the request is correctly constructed
      */
-    private function getProvidedCaptchaResponseToken()
+    private function getProvidedCaptchaResponseToken(CloudflareTurnstileCaptcha $constraint)
     {
         try {
             if ($currentRequest = $this->requestStack->getCurrentRequest()) {
                 /** @var mixed */
-                $captchaResponseToken = $currentRequest->request->get('cf-turnstile-response');
+                $captchaResponseToken = $currentRequest->request->get($constraint->responseFieldName);
             } else {
                 throw new CloudflareTurnstileInvalidResponseException('Invalid incoming request. Please check the provided request.');
             }

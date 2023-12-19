@@ -143,19 +143,7 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
-                ]
-            ]
+            $this->getOptions()
         ];
 
         // Basic configuration without error_manager section options
@@ -169,19 +157,7 @@ class ConfigurationTest extends TestCase
                     'error_manager' => []
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
-                ]
-            ]
+            $this->getOptions()
         ];
 
         // Configuration with core exception throwing enabled
@@ -197,19 +173,11 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
+            $this->getOptions([
                 'error_manager' => [
                     'throw_on_core_failure' => true
-                ],
-                'http_client' => [
-                    'options' => []
                 ]
-            ]
+            ])
         ];
 
         // Configuration without http_client section options
@@ -223,19 +191,7 @@ class ConfigurationTest extends TestCase
                     'http_client' => []
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
-                ]
-            ]
+            $this->getOptions()
         ];
 
         // Configuration with no HTTP option
@@ -251,19 +207,7 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
-                ]
-            ]
+            $this->getOptions()
         ];
 
         // Configuration with single HTTP option
@@ -281,21 +225,13 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
+            $this->getOptions([
                 'http_client' => [
                     'options' => [
                         'timeout' => 1
                     ]
                 ]
-            ]
+            ])
         ];
 
         // Configuration with multiple HTTP options
@@ -314,22 +250,14 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
+            $this->getOptions([
                 'http_client' => [
                     'options' => [
                         'timeout' => 1,
                         'max_duration' => 2
                     ]
                 ]
-            ]
+            ])
         ];
 
         // Enabled extension
@@ -343,19 +271,7 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
-                'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'enabled' => true
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
-                ]
-            ]
+            $this->getOptions()
         ];
 
         // Disabled extension
@@ -369,19 +285,32 @@ class ConfigurationTest extends TestCase
                     ]
                 ]
             ],
-            [
+            $this->getOptions([
                 'captcha' => [
                     'sitekey' => '<sitekey>',
                     'secret_key' => '<secret_key>',
+                    'explicit_js_loader' => '',
                     'enabled' => false
-                ],
-                'error_manager' => [
-                    'throw_on_core_failure' => false
-                ],
-                'http_client' => [
-                    'options' => []
                 ]
-            ]
+            ])
         ];
+    }
+
+    private function getOptions(array $modifiedOptions = []): array
+    {
+        return array_merge([
+            'captcha' => [
+                'sitekey' => '<sitekey>',
+                'secret_key' => '<secret_key>',
+                'explicit_js_loader' => '',
+                'enabled' => true
+            ],
+            'error_manager' => [
+                'throw_on_core_failure' => false
+            ],
+            'http_client' => [
+                'options' => []
+            ]
+        ], $modifiedOptions);
     }
 }

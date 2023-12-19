@@ -4,7 +4,7 @@
 
         <div id="{{ id }}_container">
             {%- if required -%}
-                <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.1.js' )}}"></script>
+                <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.2.js' )}}" data-response-field-name="{{ response_field_name }}"></script>
             {%- endif -%}
 
             <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
