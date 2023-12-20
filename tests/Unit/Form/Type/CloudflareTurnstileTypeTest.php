@@ -110,6 +110,42 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
     }
 
     /**
+     * @dataProvider validLocales
+     */
+    public function testCaptchaLanguageConfigurationWithValidLocales(string $providedLocale, string $expectedLocale): void
+    {
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-language' => $providedLocale
+            ]
+        ])->createView();
+
+        $this->assertSame($expectedLocale, $formView->vars['attr']['data-language']);
+    }
+
+    public function testCaptchaLanguageConfigurationWithUnsupportedLocaleThrowsException(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+
+        $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-language' => 'unsupported_locale'
+            ]
+        ]);
+    }
+
+    public function testCaptchaLanguageConfigurationWithInvalidLocaleDataThrowsException(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+
+        $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-language' => true
+            ]
+        ]);
+    }
+
+    /**
      * The class attribute must be prepended with cf-turnstile class since it is not present in the provided classes.
      *
      * @dataProvider classesWithoutTurnstileClass
@@ -246,6 +282,17 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
                 ]
             ]
         ];
+    }
+
+    public function validLocales(): iterable
+    {
+        yield ['en', 'en'];
+        yield ['EN', 'en'];
+        yield ['tlh', 'tlh'];
+        yield ['TLH', 'tlh'];
+        yield ['ar-eg', 'ar-eg'];
+        yield ['AR-eg', 'ar-eg'];
+        yield ['ar_EG', 'ar-eg'];
     }
 
     public function classesWithoutTurnstileClass(): iterable

@@ -9,6 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
@@ -17,6 +18,36 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
  */
 class CloudflareTurnstileType extends AbstractType
 {
+    /**
+     * @see https://developers.cloudflare.com/turnstile/reference/supported-languages/
+     */
+    const SUPPORTED_LANGUAGES_LOCALES = [
+        'auto' => true,
+        'ar-eg' => true,
+        'ar' => true,
+        'de' => true,
+        'en' => true,
+        'es' => true,
+        'fa' => true,
+        'fr' => true,
+        'id' => true,
+        'it' => true,
+        'ja' => true,
+        'ko' => true,
+        'nl' => true,
+        'pl' => true,
+        'pt' => true,
+        'pt-br' => true,
+        'ru' => true,
+        'tlh' => true,
+        'tr' => true,
+        'uk' => true,
+        'uk-ua' => true,
+        'zh' => true,
+        'zh-cn' => true,
+        'zh-tw' => true,
+    ];
+
     private string $sitekey;
     private string $explicitJsLoader;
     private bool $enabled;
@@ -35,6 +66,12 @@ class CloudflareTurnstileType extends AbstractType
         $this->enabled = $enabled;
     }
 
+
+    /**
+     * Automatically configures and normalizes Cloudflare Turnstile captcha options for easy integration
+     *
+     * {@inheritdoc}
+     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -43,6 +80,24 @@ class CloudflareTurnstileType extends AbstractType
                 new CloudflareTurnstileCaptcha()
             ]
         ]);
+
+        $resolver->setNormalizer('attr', function (Options $options, array $attributes) {
+            if (isset($attributes['data-language'])) {
+                if (!\is_string($attributes['data-language'])) {
+                    throw new InvalidOptionsException('The Cloudflare Turnstile captcha language must be represented by a supported language code');
+                }
+
+                $autoConvertedLocale = str_replace('_', '-', strtolower($attributes['data-language']));
+
+                if (!isset(self::SUPPORTED_LANGUAGES_LOCALES[$autoConvertedLocale])) {
+                    throw new InvalidOptionsException(sprintf('The %s locale is not supported by Cloudflare Turnstile', $autoConvertedLocale));
+                }
+
+                $attributes['data-language'] = $autoConvertedLocale;
+            }
+
+            return $attributes;
+        });
     }
 
     /**
