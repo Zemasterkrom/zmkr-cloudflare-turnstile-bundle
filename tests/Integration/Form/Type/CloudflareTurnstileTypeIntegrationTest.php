@@ -5,6 +5,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Form\Type;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
  * Integration test class checking that the view associated to the Cloudflare Turnstile widget is rendered correctly
@@ -25,10 +26,11 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'required' => false,
             'id' => '',
             'attr' => [
-                'class' => 'cf-turnstile' // Managed and tested within the CloudflareTurnstileType FormType class
+                'class' => 'cf-turnstile', // Managed and tested within the CloudflareTurnstileType FormType class
             ],
             'sitekey' => '',
-            'explicit_js_loader' => ''
+            'explicit_js_loader' => '',
+            'response_field_name' => CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME
         ], $context));
     }
 
@@ -38,7 +40,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'explicit_js_loader' => ''
         ];
 
-        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js#', $this->renderWidget($options));
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $this->renderWidget($options));
     }
 
     public function testCaptchaLoadingReferenceWithExplicitMode(): void
@@ -47,7 +49,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'explicit_js_loader' => 'cloudflareTurnstileLoader'
         ];
 
-        $this->assertMatchesRegularExpression('#https://challenges.cloudflare.com/turnstile/v0/api.js\?onload=cloudflareTurnstileLoader#', $this->renderWidget($options));
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?onload=cloudflareTurnstileLoader', $this->renderWidget($options));
     }
 
     public function testCaptchaIsNotRenderedIfDisabled(): void
@@ -61,7 +63,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
 
     public function testCaptchaDefaultRendering(): void
     {
-        $this->assertMatchesRegularExpression('#<div id="" data-sitekey="" class="cf-turnstile"></div>#', $this->renderWidget());
+        $this->assertStringContainsString('<div id="" data-sitekey="" class="cf-turnstile"></div>', $this->renderWidget());
     }
 
     public function testCaptchaContainerRenderingWithNoAttributes(): void
@@ -71,7 +73,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'sitekey' => 'sitekey'
         ];
 
-        $this->assertMatchesRegularExpression('#<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile"></div>#', $this->renderWidget($options));
+        $this->assertStringContainsString('<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile"></div>', $this->renderWidget($options));
     }
 
     public function testCaptchaContainerRenderingWithMultipleAttributes(): void
@@ -89,6 +91,35 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
         ];
 
         $this->assertMatchesRegularExpression('#<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile" data-test-attr="test" data-test-attr-two="" data-test-attr-three="data-test-attr-three"></div>#', $this->renderWidget($options));
+    }
+
+    public function testCaptchaCloudflareTurnstileScriptIsNotDuplicatedIfRenderedTwice(): void
+    {
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $this->renderWidget());
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $this->renderWidget());
+    }
+
+    public function testCaptchaWidgetHandlerScriptIsNotDuplicatedIfRenderedTwice(): void
+    {
+        $firstWidgetRenderingWithoutRequiredOption = $this->renderWidget();
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $firstWidgetRenderingWithoutRequiredOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $firstWidgetRenderingWithoutRequiredOption);
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $firstWidgetRenderingWithoutRequiredOption);
+
+        $secondWidgetRendering = $this->renderWidget(['required' => true]);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $secondWidgetRendering);
+        $this->assertStringContainsString('zmkr_cloudflare_turnstile_widget_handler', $secondWidgetRendering);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $secondWidgetRendering);
+
+        $thirthWidgetRendering = $this->renderWidget(['required' => true]);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $thirthWidgetRendering);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $thirthWidgetRendering);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $thirthWidgetRendering);
+
+        $fourthWidgetRenderingWithoutRequiredOption = $this->renderWidget();
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $fourthWidgetRenderingWithoutRequiredOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $fourthWidgetRenderingWithoutRequiredOption);
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $fourthWidgetRenderingWithoutRequiredOption);
     }
 
     protected static function getKernelClass(): string

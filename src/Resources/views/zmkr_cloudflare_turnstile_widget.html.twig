@@ -1,24 +1,36 @@
-{% block zmkr_cloudflare_turnstile_widget %}
-    {%- if enabled -%}
-        {%- set query_parameters = explicit_js_loader is not empty ? '?onload=' ~ explicit_js_loader : '' -%}
+{%- block zmkr_cloudflare_turnstile_widget -%}
+    {% apply spaceless %}
+        {% if enabled %}
+            {% set query_parameters = explicit_js_loader is not empty ? '?onload=' ~ explicit_js_loader : '' %}
 
-        <div id="{{ id }}_container">
-            {%- if required -%}
-                <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.2.js' )}}" data-response-field-name="{{ response_field_name }}"></script>
-            {%- endif -%}
+            {% set widget_handler_script %}
+                <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.3.js' )}}"></script>
+            {% endset %}
 
-            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
-            <div id="{{ id }}" data-sitekey="{{ sitekey }}" {%- for attrname, attrvalue in attr -%}
-                {%- if attrvalue is not same as(false) -%}
-                    {{- " " -}}
-                {%- endif -%}
+            {% set cloudflare_turnstile_script %}
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ query_parameters }}" defer></script>
+            {% endset %}
 
-                {%- if attrvalue is same as(true) -%}
-                    {{- attrname }}="{{ attrname }}"
-                {%- elseif attrvalue is not same as(false) -%}
-                    {{- attrname }}="{{ attrvalue }}"
-                {%- endif -%}
-            {%- endfor -%}></div>
-        </div>
-    {%- endif -%}
-{% endblock %}
+            <div id="{{ id }}_container">
+                {% if required %}
+                    {{ include_unique_markup('widget_handler', widget_handler_script) }}
+                    <script>window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, "{{ response_field_name }}");</script>
+                {% endif %}
+
+                {{ include_unique_markup('cloudflare_turnstile_script', cloudflare_turnstile_script) }}
+
+                <div id="{{ id }}" data-sitekey="{{ sitekey }}" {%- for attrname, attrvalue in attr -%}
+                    {%- if attrvalue is not same as(false) -%}
+                        {{- " " -}}
+                    {%- endif -%}
+
+                    {%- if attrvalue is same as(true) -%}
+                        {{- attrname }}="{{ attrname }}"
+                    {%- elseif attrvalue is not same as(false) -%}
+                        {{- attrname }}="{{ attrvalue }}"
+                    {%- endif -%}
+                {%- endfor -%}></div>
+            </div>
+        {% endif %}
+    {% endapply %}
+{%- endblock -%}

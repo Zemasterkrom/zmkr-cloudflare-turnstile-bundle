@@ -9,6 +9,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInter
 use Zemasterkrom\CloudflareTurnstileBundle\DependencyInjection\ZmkrCloudflareTurnstileExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Twig\UniqueMarkupIncluderExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 /**
@@ -66,6 +67,10 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($clientDefinition->getClass(), CloudflareTurnstileClient::class);
         $this->assertSame($clientDefinition->getArgument('$secretKey'), $this->getVariablePlaceholder(self::CAPTCHA_SECRET_KEY_REFERENCE));
         $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
+
+        $uniqueMarkupIncluderDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.unique_markup_includer_extension');
+
+        $this->assertSame($uniqueMarkupIncluderDefinition->getClass(), UniqueMarkupIncluderExtension::class);
     }
 
     /**

@@ -6,6 +6,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Twig\UniqueMarkupIncluderExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 return function (ContainerConfigurator $configurator) {
@@ -37,4 +38,7 @@ return function (ContainerConfigurator $configurator) {
     $services->set(CloudflareTurnstileClientInterface::class, CloudflareTurnstileClient::class)
         ->arg('$secretKey', '%zmkr_cloudflare_turnstile.parameters.captcha.secret_key%')
         ->arg('$options', '%zmkr_cloudflare_turnstile.parameters.http_client.options%');
+
+    $services->set('zmkr_cloudflare_turnstile.services.unique_markup_includer_extension', UniqueMarkupIncluderExtension::class)
+        ->tag('twig.extension');
 };

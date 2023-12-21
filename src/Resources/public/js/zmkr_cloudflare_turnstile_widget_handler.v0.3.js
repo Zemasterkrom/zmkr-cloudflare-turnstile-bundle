@@ -25,5 +25,3 @@ window.zmkrCloudflareTurnstileBundleCaptcha = {
         }
     }
 };
-
-window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, document.currentScript ? document.currentScript.getAttribute('data-response-field-name') : 'cf-turnstile-response');

@@ -1,0 +1,17 @@
+--TEST--
+include_unique_markup must return the newly registered markup
+
+--TEMPLATE--
+{{ include_unique_markup('markup', '<div id="test"></div>') }}
+{{ include_unique_markup('markup2', '<div id="test2"></div>') }}
+{{ include_unique_markup('markup2', '<div id="test3"></div>') }}
+{{ include_unique_markup('markup3', '<div id="test4"></div>') }}
+
+--DATA--
+return []
+
+--EXPECT--
+<div id="test"></div>
+<div id="test2"></div>
+<div id="test3"></div>
+<div id="test4"></div>

@@ -66,7 +66,6 @@ class CloudflareTurnstileType extends AbstractType
         $this->enabled = $enabled;
     }
 
-
     /**
      * Automatically configures and normalizes Cloudflare Turnstile captcha options for easy integration
      *
@@ -162,6 +161,7 @@ class CloudflareTurnstileType extends AbstractType
         $view->vars['response_field_name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
         $view->vars['attr']['data-response-field-name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
     }
+
 
     public function getBlockPrefix(): string
     {
