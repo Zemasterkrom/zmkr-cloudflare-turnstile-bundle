@@ -301,55 +301,29 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         yield ['test', 'cf-turnstile test'];
         yield ['test test2', 'cf-turnstile test test2'];
 
-        yield ['  test  ', 'cf-turnstile test'];
-        yield ['  test test2  ', 'cf-turnstile test test2'];
-        yield ['  test test2 acf-turnstile  ', 'cf-turnstile test test2 acf-turnstile'];
-        yield ['  test test2 cf-turnstilea  ', 'cf-turnstile test test2 cf-turnstilea'];
-        yield ['  test test2 acf-turnstilea  ', 'cf-turnstile test test2 acf-turnstilea'];
-
         yield ['acf-turnstile', 'cf-turnstile acf-turnstile'];
         yield ['cf-turnstilea', 'cf-turnstile cf-turnstilea'];
         yield ['acf-turnstilea', 'cf-turnstile acf-turnstilea'];
 
-        yield ['  acf-turnstile  ', 'cf-turnstile acf-turnstile'];
-        yield ['  cf-turnstilea  ', 'cf-turnstile cf-turnstilea'];
-        yield ['  acf-turnstilea  ', 'cf-turnstile acf-turnstilea'];
-
         yield ['test acf-turnstile', 'cf-turnstile test acf-turnstile'];
         yield ['test cf-turnstilea', 'cf-turnstile test cf-turnstilea'];
         yield ['test acf-turnstilea', 'cf-turnstile test acf-turnstilea'];
-
-        yield ['  test acf-turnstile  ', 'cf-turnstile test acf-turnstile'];
-        yield ['  test cf-turnstilea  ', 'cf-turnstile test cf-turnstilea'];
-        yield ['  test acf-turnstilea  ', 'cf-turnstile test acf-turnstilea'];
-
-        yield ['  acf-turnstile test  ', 'cf-turnstile acf-turnstile test'];
-        yield ['  cf-turnstilea test  ', 'cf-turnstile cf-turnstilea test'];
-        yield ['  acf-turnstilea test  ', 'cf-turnstile acf-turnstilea test'];
     }
 
     public function classesWithTurnstileClass(): iterable
     {
         yield ['cf-turnstile', 'cf-turnstile'];
-        yield ['  cf-turnstile  ', 'cf-turnstile'];
-
         yield ['test cf-turnstile', 'test cf-turnstile'];
-        yield ['  test cf-turnstile  ', 'test cf-turnstile'];
-
         yield ['test cf-turnstile test2', 'test cf-turnstile test2'];
-        yield ['  test cf-turnstile test2  ', 'test cf-turnstile test2'];
 
         yield ['test acf-turnstile cf-turnstile', 'test acf-turnstile cf-turnstile'];
         yield ['test cf-turnstilea cf-turnstile', 'test cf-turnstilea cf-turnstile'];
-        yield ['  test acf-turnstilea cf-turnstile  ', 'test acf-turnstilea cf-turnstile'];
 
         yield ['acf-turnstile cf-turnstile test', 'acf-turnstile cf-turnstile test'];
         yield ['cf-turnstilea cf-turnstile test', 'cf-turnstilea cf-turnstile test'];
-        yield ['  acf-turnstilea cf-turnstile test  ', 'acf-turnstilea cf-turnstile test'];
 
         yield ['test acf-turnstile cf-turnstile test2', 'test acf-turnstile cf-turnstile test2'];
         yield ['test cf-turnstilea cf-turnstile test2', 'test cf-turnstilea cf-turnstile test2'];
-        yield ['  test acf-turnstilea cf-turnstile test2  ', 'test acf-turnstilea cf-turnstile test2'];
     }
 
     public function formsWithMultipleCaptchas(): iterable

@@ -95,6 +95,12 @@ class CloudflareTurnstileType extends AbstractType
                 $attributes['data-language'] = $autoConvertedLocale;
             }
 
+            if (isset($attributes['class']) && !\is_scalar($attributes['class']) && !(\is_object($attributes['class']) && method_exists($attributes['class'], '__toString'))) {
+                throw new InvalidOptionsException('Cloudflare Turnstile captcha widget class must be stringable');
+            }
+
+            $attributes['class'] = isset($attributes['class']) && $attributes['class'] ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
+
             return $attributes;
         });
     }
@@ -150,7 +156,7 @@ class CloudflareTurnstileType extends AbstractType
             throw new LogicException('Unable to add multiple Cloudflare Turnstile captchas to the same form');
         }
 
-        $view->vars['attr']['class'] = trim(isset($options['attr']['class']) ? (preg_match("/\bcf-turnstile\b/", $options['attr']['class']) ? $options['attr']['class'] : 'cf-turnstile ' . trim($options['attr']['class'])) : 'cf-turnstile');
+        $view->vars['attr']['class'] = $options['attr']['class'];
         $view->vars['sitekey'] = $this->sitekey;
         $view->vars['explicit_js_loader'] = $this->explicitJsLoader;
         $view->vars['enabled'] = $this->enabled;
