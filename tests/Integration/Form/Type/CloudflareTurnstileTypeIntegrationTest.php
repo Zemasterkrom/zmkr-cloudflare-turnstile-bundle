@@ -16,7 +16,12 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
 
     public function setUp(): void
     {
-        $this->twig = static::getContainer()->get(Environment::class); // @phpstan-ignore-line
+        self::bootKernel();
+
+        /** @disregard P1013 Undefined method */
+        /** @disregard P1014 Undefined property */
+        /** @phpstan-ignore-next-line */
+        $this->twig = method_exists($this, 'getContainer') ? static::getContainer()->get(Environment::class) : self::$container->get(Environment::class);
     }
 
     private function renderWidget(array $context = []): string

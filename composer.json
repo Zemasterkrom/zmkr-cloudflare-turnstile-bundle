@@ -32,7 +32,7 @@
         "dbrekelmans/bdi": "^1.0",
         "dg/bypass-finals": "^1.0",
         "phpstan/phpstan-symfony": "^1.0",
-        "symfony/panther": "^1.0|^2.0",
+        "symfony/panther": "^0.8|^1.0|^2.0",
         "symfony/phpunit-bridge": "^5.0|^6.0|^7.0"
     },
     "autoload": {

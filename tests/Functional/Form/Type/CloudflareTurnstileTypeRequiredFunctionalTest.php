@@ -79,9 +79,9 @@ EOF);
         return (new \ReflectionClass($this))->getShortName();
     }
 
-    private function getDocumentBodyHtml(): ?string
+    private function getDocumentBodyHtml(): string
     {
-        return $this->client->executeScript('return document.body.innerHTML;');
+        return $this->client->executeScript('return document.body ? document.body.innerHTML : "";') ?? '';
     }
 
     public function testCaptchaRequiredModeWithoutFormThrowsException(): void
@@ -210,8 +210,24 @@ EOF);
                 window.zmkrCloudflareTurnstileBundleCaptcha.required(widgetContainerWithCaptchaResponse.childNodes[0], 'cf-turnstile-response');
                 submitButton.click();
 EOF);
-        $this->client->waitForElementToNotContain('body', $this->getShortClassName());
-        $this->assertEmpty($this->getDocumentBodyHtml());
+
+        // Wait for body refresh after submit
+        $timeout = 10;
+        $interval = 500;
+        $start = microtime(true);
+
+        while (microtime(true) - $start < $timeout) {
+            $body = $this->getDocumentBodyHtml();
+
+            if (strpos($body, $this->getShortClassName()) === false) {
+                $this->assertEmpty($body);
+                return;
+            }
+
+            usleep($interval * 1000);
+        }
+
+        $this->fail('Failed to wait for document body refresh after form submission');
     }
 
     protected static function getKernelClass(): string

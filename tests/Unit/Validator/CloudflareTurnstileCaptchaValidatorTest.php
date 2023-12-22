@@ -4,13 +4,16 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Validator;
 
 use DG\BypassFinals;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionClass;
+use ReflectionNamedType;
+use ReflectionProperty;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
@@ -21,6 +24,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiExcep
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileInvalidResponseException;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
+use Symfony\Component\HttpFoundation\InputBag;
 
 /**
  * Clouflare turnstile validator test class.
@@ -202,27 +206,26 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
         $this->errorManager = new CloudflareTurnstileErrorManager(true);
 
         // Mocked ParameterBag to keep consistent get behavior between Symfony 5 and 6
-        /** @var \Symfony\Component\HttpFoundation\InputBag&ParameterBag&MockObject */
-        /** @phpstan-ignore-next-line */
-        $mockedParameterBag = class_exists('\Symfony\Component\HttpFoundation\InputBag') ? $this->createMock('\Symfony\Component\HttpFoundation\InputBag') : $this->createMock(ParameterBag::class);
+        $mockedParameterBag = $this->getMockedParameterBag();
+        $requestGetterReturnType = (new ReflectionClass($mockedParameterBag))->getMethod('get')->getReturnType();
 
-        /*
-        Before Symfony 6, non-scalar parameters were allowed on the get operation.
-        To maintain consistency between captcha verification logic and Symfony versions, this is not allowed and is verified since a form cannot contain multiple captchas responses.
-        */
-        if (Kernel::VERSION_ID < 60000) {
-            $mockedParameterBag->method('get')
-                ->willReturn([]);
-        } else {
+        if ($requestGetterReturnType) {
             // Since Symfony 6, parameters must be typed. It is not possible to break the contract (as a TypeError would be thrown)
             $mockedParameterBag->method('get')
                 ->willThrowException(new class extends \UnexpectedValueException implements RequestExceptionInterface
                 {
                 });
+        } else {
+            /**
+             * Before Symfony 6, non-scalar parameters were allowed on the get operation.
+             * To maintain consistency between captcha verification logic and Symfony versions, this is not allowed and is verified since a form cannot contain multiple captchas responses.
+             */
+            $mockedParameterBag->method('get')
+                ->willReturn([]);
         }
 
         $mockedRequest = $this->createMock(Request::class);
-        $mockedRequest->request = $mockedParameterBag;
+        $mockedRequest->request = $mockedParameterBag; // @phpstan-ignore-line
 
         // The simulated RequestStack will return the simulated Request with consistent behavior, which contains non-scalar data and should raise an error during validation
         $mockedRequestStack = $this->createMock(RequestStack::class);
@@ -249,16 +252,14 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
 
         $this->errorManager = new CloudflareTurnstileErrorManager(true);
 
-        /** @var \Symfony\Component\HttpFoundation\InputBag&ParameterBag&MockObject */
-        /** @phpstan-ignore-next-line */
-        $mockedParameterBag = class_exists('\Symfony\Component\HttpFoundation\InputBag') ? $this->createMock('\Symfony\Component\HttpFoundation\InputBag') : $this->createMock(ParameterBag::class);
+        $mockedParameterBag = $this->getMockedParameterBag();
         $mockedParameterBag->method('get')
             ->willThrowException(new class extends \UnexpectedValueException implements RequestExceptionInterface
             {
             });
 
         $mockedRequest = $this->createMock(Request::class);
-        $mockedRequest->request = $mockedParameterBag;
+        $mockedRequest->request = $mockedParameterBag; // @phpstan-ignore-line
 
         $mockedRequestStack = $this->createMock(RequestStack::class);
         $mockedRequestStack->method('getCurrentRequest')
@@ -290,5 +291,24 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
         $this->validator->validate('', $cloudflareTurnstileCaptchaConstraint);
 
         $this->buildViolation($cloudflareTurnstileCaptchaConstraint->message)->assertRaised();
+    }
+
+    /**
+     * @return ParameterBagInterface&MockObject
+     */
+    public function getMockedParameterBag()
+    {
+        $requestParameterBagType = (new ReflectionProperty(Request::class, 'request'))->getType();
+
+        if ($requestParameterBagType instanceof ReflectionNamedType) {
+            $requestParameterBagType = $requestParameterBagType->getName();
+        }
+
+        /** @disregard P1009 Undefined type */
+        /** @var ParameterBagInterface&MockObject */
+        /** @phpstan-ignore-next-line */
+        $mockedParameterBag = class_exists(InputBag::class) && $requestParameterBagType === InputBag::class ? $this->createMock(InputBag::class) : $this->createMock(ParameterBag::class);
+
+        return $mockedParameterBag;
     }
 }

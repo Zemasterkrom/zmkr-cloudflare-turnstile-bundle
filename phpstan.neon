@@ -12,4 +12,5 @@ parameters:
         - "#Test.* has parameter .* with no type specified#"
         - "#Test.* type has no value type specified in iterable type#"
         - "#Test extends generic class .* but does not specify its types#"
+        - "#Method .* invoked with .* parameters#"
 
