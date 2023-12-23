@@ -50,6 +50,7 @@ class CloudflareTurnstileType extends AbstractType
 
     private string $sitekey;
     private string $explicitJsLoader;
+    private static bool $reCaptchaCompatibilityModeEnabled = false;
     private bool $enabled;
 
     /**
@@ -161,13 +162,13 @@ class CloudflareTurnstileType extends AbstractType
         $view->vars['explicit_js_loader'] = $this->explicitJsLoader;
         $view->vars['enabled'] = $this->enabled;
         $view->vars['required'] = $options['required'];
+        $view->vars['recaptcha_compatibility_mode_enabled'] = self::$reCaptchaCompatibilityModeEnabled;
 
         /** @var CloudflareTurnstileCaptcha */
         $cloudflareTurnstileCaptchaConstraint = $options['constraints'][0];
         $view->vars['response_field_name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
         $view->vars['attr']['data-response-field-name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
     }
-
 
     public function getBlockPrefix(): string
     {
@@ -185,5 +186,30 @@ class CloudflareTurnstileType extends AbstractType
     public function getParent(): string
     {
         return HiddenType::class;
+    }
+
+    public static function toggleReCaptchaCompatibilityMode(bool $enabled): void
+    {
+        self::$reCaptchaCompatibilityModeEnabled = $enabled;
+    }
+
+    public static function isReCaptchaCompatibilityModeEnabled(): bool
+    {
+        return self::$reCaptchaCompatibilityModeEnabled;
+    }
+
+    public function getSitekey(): string
+    {
+        return $this->sitekey;
+    }
+
+    public function getExplicitJsLoader(): string
+    {
+        return $this->explicitJsLoader;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

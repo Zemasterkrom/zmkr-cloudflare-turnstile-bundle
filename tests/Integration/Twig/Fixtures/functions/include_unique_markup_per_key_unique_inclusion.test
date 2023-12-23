@@ -1,0 +1,20 @@
+--TEST--
+include_unique_markup_per_key must return the registered markup associated with a key identifier only once, even if new markup is provided
+
+--TEMPLATE--
+{{ include_unique_markup_per_key('markup', '<div id="test"></div>') }}
+{{ include_unique_markup_per_key('markup', '<div id="test"></div>') }}
+{{ include_unique_markup_per_key('markup', '<div id="test3"></div>') }}
+{{ include_unique_markup_per_key('markup2', '<div id="test4"></div>') }}
+{{ include_unique_markup_per_key('markup2', '<div id="test4"></div>') }}
+{{ include_unique_markup_per_key('markup2', '<div id="test6"></div>') }}
+
+--DATA--
+return []
+
+--EXPECT--
+<div id="test"></div>
+
+
+<div id="test4"></div>
+

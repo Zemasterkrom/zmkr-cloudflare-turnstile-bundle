@@ -35,6 +35,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             ],
             'sitekey' => '',
             'explicit_js_loader' => '',
+            'recaptcha_compatibility_mode_enabled' => false,
             'response_field_name' => CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME
         ], $context));
     }
@@ -54,7 +55,26 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'explicit_js_loader' => 'cloudflareTurnstileLoader'
         ];
 
-        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?onload=cloudflareTurnstileLoader', $this->renderWidget($options));
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=cloudflareTurnstileLoader', $this->renderWidget($options));
+    }
+
+    public function testCaptchaLoadingReferenceWithReCaptchaMode(): void
+    {
+        $options = [
+            'recaptcha_compatibility_mode_enabled' => true
+        ];
+
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha', $this->renderWidget($options));
+    }
+
+    public function testCaptchaLoadingReferenceWithExplicitModeAndReCaptchaMode(): void
+    {
+        $options = [
+            'explicit_js_loader' => 'cloudflareTurnstileLoader',
+            'recaptcha_compatibility_mode_enabled' => true
+        ];
+
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=cloudflareTurnstileLoader&amp;compat=recaptcha', $this->renderWidget($options));
     }
 
     public function testCaptchaIsNotRenderedIfDisabled(): void
@@ -106,25 +126,25 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
 
     public function testCaptchaWidgetHandlerScriptIsNotDuplicatedIfRenderedTwice(): void
     {
-        $firstWidgetRenderingWithoutRequiredOption = $this->renderWidget();
-        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $firstWidgetRenderingWithoutRequiredOption);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $firstWidgetRenderingWithoutRequiredOption);
-        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $firstWidgetRenderingWithoutRequiredOption);
+        $firstWidgetRenderingNoRequiredOption = $this->renderWidget();
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $firstWidgetRenderingNoRequiredOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $firstWidgetRenderingNoRequiredOption);
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $firstWidgetRenderingNoRequiredOption);
 
-        $secondWidgetRendering = $this->renderWidget(['required' => true]);
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $secondWidgetRendering);
-        $this->assertStringContainsString('zmkr_cloudflare_turnstile_widget_handler', $secondWidgetRendering);
-        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $secondWidgetRendering);
+        $secondWidgetRenderingRequiredOption = $this->renderWidget(['required' => true]);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $secondWidgetRenderingRequiredOption);
+        $this->assertStringContainsString('zmkr_cloudflare_turnstile_widget_handler', $secondWidgetRenderingRequiredOption);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $secondWidgetRenderingRequiredOption);
 
-        $thirthWidgetRendering = $this->renderWidget(['required' => true]);
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $thirthWidgetRendering);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $thirthWidgetRendering);
-        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $thirthWidgetRendering);
+        $thirthWidgetRenderingRequiredOption = $this->renderWidget(['required' => true]);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $thirthWidgetRenderingRequiredOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $thirthWidgetRenderingRequiredOption);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $thirthWidgetRenderingRequiredOption);
 
-        $fourthWidgetRenderingWithoutRequiredOption = $this->renderWidget();
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $fourthWidgetRenderingWithoutRequiredOption);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $fourthWidgetRenderingWithoutRequiredOption);
-        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $fourthWidgetRenderingWithoutRequiredOption);
+        $fourthWidgetRenderingNoRequiredOption = $this->renderWidget();
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $fourthWidgetRenderingNoRequiredOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $fourthWidgetRenderingNoRequiredOption);
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $fourthWidgetRenderingNoRequiredOption);
     }
 
     protected static function getKernelClass(): string

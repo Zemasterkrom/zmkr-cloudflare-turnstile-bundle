@@ -1,0 +1,15 @@
+--TEST--
+include_unique_markup_per_key must return the newly registered markup
+
+--TEMPLATE--
+{{ include_unique_markup_per_key('markup', '<div id="test"></div>') }}
+{{ include_unique_markup_per_key('markup2', '<div id="test2"></div>') }}
+{{ include_unique_markup_per_key('markup3', '<div id="test3"></div>') }}
+
+--DATA--
+return []
+
+--EXPECT--
+<div id="test"></div>
+<div id="test2"></div>
+<div id="test3"></div>

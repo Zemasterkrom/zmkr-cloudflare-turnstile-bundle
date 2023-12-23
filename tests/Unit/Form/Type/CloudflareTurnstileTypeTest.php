@@ -67,6 +67,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
         $this->assertEmpty($formView->vars['explicit_js_loader']);
         $this->assertTrue($formView->vars['enabled']);
+        $this->assertFalse($formView->vars['recaptcha_compatibility_mode_enabled']);
         $this->assertSame($formView->vars['response_field_name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
         $this->assertSame($formView->vars['attr']['data-response-field-name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
     }
@@ -78,6 +79,20 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertSame('cloudflareTurnstileLoader', $formView->vars['explicit_js_loader']);
+    }
+
+    public function testCaptchaReCaptchaCompatibilityToggler(): void
+    {
+        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, 'cloudflareTurnstileLoader', true));
+
+        CloudflareTurnstileType::toggleReCaptchaCompatibilityMode(true);
+        $form = $this->factory->create(CloudflareTurnstileType::class);
+        $formView = $form->createView();
+        $this->assertTrue($formView->vars['recaptcha_compatibility_mode_enabled']);
+
+        CloudflareTurnstileType::toggleReCaptchaCompatibilityMode(false);
+        $formView = $form->createView();
+        $this->assertFalse($formView->vars['recaptcha_compatibility_mode_enabled']);
     }
 
     public function testCaptchaFormTypeDisabledFlag(): void

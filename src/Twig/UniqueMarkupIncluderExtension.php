@@ -12,38 +12,51 @@ use Twig\TwigFunction;
 class UniqueMarkupIncluderExtension extends AbstractExtension
 {
     /**
-     * @var array<string, string>
+     * @var array<string, bool>
      */
-    private array $includedMarkup;
+    private array $includedMarkups;
 
     public function __construct()
     {
-        $this->includedMarkup = [];
+        $this->includedMarkups = [];
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('include_unique_markup', [$this, 'includeUniqueMarkup']),
+            new TwigFunction('include_unique_markup_per_key', [$this, 'includeUniqueMarkupPerKey']),
+            new TwigFunction('is_markup_already_included', [$this, 'isMarkupAlreadyIncluded']),
         ];
     }
 
     /**
-     * Uniquely include provided markup in the template
+     * Uniquely include provided markup in the template by checking against a key tag
      *
      * @param string $key Markup data key identifier
      * @param string $markup Markup data to include
      *
-     * @return Markup Provided markup data if not already registered in the included markups, empty markup otherwise
+     * @return Markup Provided markup data if key not already associated in the included markups, empty markup otherwise
      */
-    public function includeUniqueMarkup(string $key, string $markup): Markup
+    public function includeUniqueMarkupPerKey(string $key, string $markup): Markup
     {
-        if (!isset($this->includedMarkup[$key]) || $this->includedMarkup[$key] !== $markup) {
-            $this->includedMarkup[$key] = $markup;
+        if (!isset($this->includedMarkups[$key])) {
+            $this->includedMarkups[$key] = true;
 
             return new Markup($markup, 'UTF-8');
         }
 
         return new Markup('', 'UTF-8');
+    }
+
+    /**
+     * Checks whether a markup identified by a key has already been included in a template
+     *
+     * @param string $key Markup data key identifier
+     *
+     * @return bool
+     */
+    public function isMarkupAlreadyIncluded(string $key): bool
+    {
+        return isset($this->includedMarkups[$key]);
     }
 }
