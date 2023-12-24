@@ -9,8 +9,8 @@
                         {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'render': 'explicit', 'onload': explicit_js_loader}) %}
                     {% endif %}
 
-                    {% if recaptcha_compatibility_mode_enabled %}
-                        {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'compat': 'recaptcha'}) %}
+                    {% if compatibility_mode is not empty %}
+                        {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'compat': compatibility_mode}) %}
                     {% endif %}
 
                     {% set cloudflare_turnstile_script %}

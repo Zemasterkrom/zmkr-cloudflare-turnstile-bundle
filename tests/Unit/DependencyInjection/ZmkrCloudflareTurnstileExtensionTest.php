@@ -24,7 +24,8 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
     private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.enabled';
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
-    private const CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader';
+    private const EXPLICIT_JS_LOADER_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader';
+    private const COMPATIBILITY_MODE_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.compatibility_mode';
     private const ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure';
     private const HTTP_CLIENT_OPTIONS_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.http_client.options';
 
@@ -47,8 +48,9 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->assertSame($typeDefinition->getClass(), CloudflareTurnstileType::class);
         $this->assertSame($typeDefinition->getArgument('$sitekey'), $this->getVariablePlaceholder(self::CAPTCHA_SITEKEY_REFERENCE));
-        $this->assertSame($typeDefinition->getArgument('$explicitJsLoader'), $this->getVariablePlaceholder(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE));
         $this->assertSame($typeDefinition->getArgument('$enabled'), $this->getVariablePlaceholder(self::ENABLED_FLAG_REFERENCE));
+        $this->assertSame($typeDefinition->getArgument('$explicitJsLoader'), $this->getVariablePlaceholder(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertSame($typeDefinition->getArgument('$compatibilityMode'), $this->getVariablePlaceholder(self::COMPATIBILITY_MODE_REFERENCE));
 
         $validatorDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.validator');
 
@@ -102,7 +104,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE), '');
+        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
     }
 
@@ -119,7 +121,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE), 'cloudflareTurnstileLoader');
+        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), 'cloudflareTurnstileLoader');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
     }
 
@@ -136,7 +138,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), false);
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE), '');
+        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
     }
 
@@ -153,7 +155,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
         $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE), '');
+        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
     }
 
@@ -171,7 +173,7 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
         $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_EXPLICIT_JS_LOADER_REFERENCE), '');
+        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
         $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), true);
     }
 

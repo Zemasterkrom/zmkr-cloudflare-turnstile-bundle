@@ -3,7 +3,10 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Form\Type;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\Forms;
 use Twig\Environment;
+use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
@@ -13,6 +16,7 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
 {
     private Environment $twig;
+    private FormFactoryInterface $factory;
 
     public function setUp(): void
     {
@@ -22,22 +26,22 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
         /** @disregard P1014 Undefined property */
         /** @phpstan-ignore-next-line */
         $this->twig = method_exists($this, 'getContainer') ? static::getContainer()->get(Environment::class) : self::$container->get(Environment::class);
+        $this->initializeFormTypeFactory(new CloudflareTurnstileType('', true));
     }
 
-    private function renderWidget(array $context = []): string
+    private function initializeFormTypeFactory(CloudflareTurnstileType $cloudflareTurnstileType): void
     {
-        return $this->twig->render('@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig', array_merge([
-            'enabled' => true,
-            'required' => false,
-            'id' => '',
-            'attr' => [
-                'class' => 'cf-turnstile', // Managed and tested within the CloudflareTurnstileType FormType class
-            ],
-            'sitekey' => '',
-            'explicit_js_loader' => '',
-            'recaptcha_compatibility_mode_enabled' => false,
-            'response_field_name' => CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME
-        ], $context));
+        $this->factory = Forms::createFormFactoryBuilder()->addType($cloudflareTurnstileType)->getFormFactory();
+    }
+
+    private function renderWidget(array $options = []): string
+    {
+        $templateOptions = array_replace_recursive(
+            $this->factory->create(CloudflareTurnstileType::class)->createView()->vars,
+            $options
+        );
+
+        return $this->twig->render('@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig', $templateOptions);
     }
 
     public function testCaptchaLoadingReferenceWithImplicitMode(): void
@@ -61,7 +65,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
     public function testCaptchaLoadingReferenceWithReCaptchaMode(): void
     {
         $options = [
-            'recaptcha_compatibility_mode_enabled' => true
+            'compatibility_mode' => 'recaptcha'
         ];
 
         $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha', $this->renderWidget($options));
@@ -71,7 +75,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
     {
         $options = [
             'explicit_js_loader' => 'cloudflareTurnstileLoader',
-            'recaptcha_compatibility_mode_enabled' => true
+            'compatibility_mode' => 'recaptcha'
         ];
 
         $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=cloudflareTurnstileLoader&amp;compat=recaptcha', $this->renderWidget($options));
@@ -88,7 +92,11 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
 
     public function testCaptchaDefaultRendering(): void
     {
-        $this->assertStringContainsString('<div id="" data-sitekey="" class="cf-turnstile"></div>', $this->renderWidget());
+        $options = [
+            'id' => 'cloudflareTurnstileWidget'
+        ];
+
+        $this->assertStringContainsString('<div id="cloudflareTurnstileWidget" data-sitekey="" class="cf-turnstile" data-response-field-name="cf-turnstile-response"></div>', $this->renderWidget($options));
     }
 
     public function testCaptchaContainerRenderingWithNoAttributes(): void
@@ -98,7 +106,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'sitekey' => 'sitekey'
         ];
 
-        $this->assertStringContainsString('<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile"></div>', $this->renderWidget($options));
+        $this->assertStringContainsString('<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile" data-response-field-name="cf-turnstile-response"></div>', $this->renderWidget($options));
     }
 
     public function testCaptchaContainerRenderingWithMultipleAttributes(): void
@@ -115,7 +123,7 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
             'sitekey' => 'sitekey'
         ];
 
-        $this->assertMatchesRegularExpression('#<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile" data-test-attr="test" data-test-attr-two="" data-test-attr-three="data-test-attr-three"></div>#', $this->renderWidget($options));
+        $this->assertMatchesRegularExpression('#<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile" data-response-field-name="cf-turnstile-response" data-test-attr="test" data-test-attr-two="" data-test-attr-three="data-test-attr-three"></div>#', $this->renderWidget($options));
     }
 
     public function testCaptchaCloudflareTurnstileScriptIsNotDuplicatedIfRenderedTwice(): void

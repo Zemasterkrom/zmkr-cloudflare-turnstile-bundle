@@ -260,6 +260,42 @@ class ConfigurationTest extends TestCase
             ])
         ];
 
+        // Configuration with explicit JavaScript loader
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>',
+                        'explicit_js_loader' => 'cloudflareTurnstileLoader'
+                    ]
+                ]
+            ],
+            $this->getOptions([
+                'captcha' => [
+                    'explicit_js_loader' => 'cloudflareTurnstileLoader'
+                ]
+            ])
+        ];
+
+        // Configuration with compatibility mode
+        yield [
+            [
+                'zmkr_cloudflare_turnstile' => [
+                    'captcha' => [
+                        'sitekey' => '<sitekey>',
+                        'secret_key' => '<secret_key>',
+                        'compatibility_mode' => 'recaptcha'
+                    ]
+                ]
+            ],
+            $this->getOptions([
+                'captcha' => [
+                    'compatibility_mode' => 'recaptcha'
+                ]
+            ])
+        ];
+
         // Enabled extension
         yield [
             [
@@ -287,9 +323,6 @@ class ConfigurationTest extends TestCase
             ],
             $this->getOptions([
                 'captcha' => [
-                    'sitekey' => '<sitekey>',
-                    'secret_key' => '<secret_key>',
-                    'explicit_js_loader' => '',
                     'enabled' => false
                 ]
             ])
@@ -298,12 +331,13 @@ class ConfigurationTest extends TestCase
 
     private function getOptions(array $modifiedOptions = []): array
     {
-        return array_merge([
+        return array_replace_recursive([
             'captcha' => [
                 'sitekey' => '<sitekey>',
                 'secret_key' => '<secret_key>',
+                'enabled' => true,
                 'explicit_js_loader' => '',
-                'enabled' => true
+                'compatibility_mode' => ''
             ],
             'error_manager' => [
                 'throw_on_core_failure' => false

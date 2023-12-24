@@ -49,22 +49,24 @@ class CloudflareTurnstileType extends AbstractType
     ];
 
     private string $sitekey;
-    private string $explicitJsLoader;
-    private static bool $reCaptchaCompatibilityModeEnabled = false;
     private bool $enabled;
+    private static string $explicitJsLoader;
+    private static string $compatibilityMode;
 
     /**
      * CloudflareTurnstileType constructor
      *
      * @param string $sitekey The Cloudflare Turnstile sitekey for captcha integration
-     * @param string $explicitJsLoader If explicit loading is used, the referenced function will be called to load the captcha instead of using the default loading process
      * @param bool $enabled Flag indicating whether the captcha is enabled
+     * @param string $explicitJsLoader If explicit loading is used, the referenced function will be called to load the captcha instead of using the default loading process
+     * @param string $compatibilityMode Compatibility flag with other captchas (@see https://developers.cloudflare.com/turnstile/migration/)
      */
-    public function __construct(string $sitekey, string $explicitJsLoader, bool $enabled)
+    public function __construct(string $sitekey, bool $enabled, string $explicitJsLoader = '', string $compatibilityMode = '')
     {
         $this->sitekey = $sitekey;
-        $this->explicitJsLoader = $explicitJsLoader;
         $this->enabled = $enabled;
+        self::$compatibilityMode = $compatibilityMode;
+        self::$explicitJsLoader = $explicitJsLoader;
     }
 
     /**
@@ -74,10 +76,16 @@ class CloudflareTurnstileType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
+        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
+
+        if (self::$compatibilityMode === 'recaptcha') {
+            $cloudflareTurnstileCaptchaConstraint->responseFieldName = 'g-recaptcha-response';
+        }
+
         $resolver->setDefaults([
             'mapped' => false,
             'constraints' => [
-                new CloudflareTurnstileCaptcha()
+                $cloudflareTurnstileCaptchaConstraint
             ]
         ]);
 
@@ -159,10 +167,10 @@ class CloudflareTurnstileType extends AbstractType
 
         $view->vars['attr']['class'] = $options['attr']['class'];
         $view->vars['sitekey'] = $this->sitekey;
-        $view->vars['explicit_js_loader'] = $this->explicitJsLoader;
+        $view->vars['explicit_js_loader'] = self::$explicitJsLoader;
         $view->vars['enabled'] = $this->enabled;
         $view->vars['required'] = $options['required'];
-        $view->vars['recaptcha_compatibility_mode_enabled'] = self::$reCaptchaCompatibilityModeEnabled;
+        $view->vars['compatibility_mode'] = self::$compatibilityMode;
 
         /** @var CloudflareTurnstileCaptcha */
         $cloudflareTurnstileCaptchaConstraint = $options['constraints'][0];
@@ -188,24 +196,39 @@ class CloudflareTurnstileType extends AbstractType
         return HiddenType::class;
     }
 
-    public static function toggleReCaptchaCompatibilityMode(bool $enabled): void
+    public static function setExplicitJsLoader(?string $explicitJsLoader): void
     {
-        self::$reCaptchaCompatibilityModeEnabled = $enabled;
+        self::$explicitJsLoader = $explicitJsLoader ?? '';
     }
 
-    public static function isReCaptchaCompatibilityModeEnabled(): bool
+    public static function isExplicitModeEnabled(): bool
     {
-        return self::$reCaptchaCompatibilityModeEnabled;
+        return self::$explicitJsLoader !== '';
+    }
+
+    public static function getExplicitJsLoader(): string
+    {
+        return self::$explicitJsLoader;
+    }
+
+    public static function setCompatibilityMode(?string $compatibilityMode): void
+    {
+        self::$compatibilityMode = $compatibilityMode ?? '';
+    }
+
+    public static function isCompatibilityModeEnabled(string $compatibilityMode = ''): bool
+    {
+        return self::$compatibilityMode && self::$compatibilityMode === $compatibilityMode;
+    }
+
+    public static function getCompatibilityMode(): string
+    {
+        return self::$compatibilityMode;
     }
 
     public function getSitekey(): string
     {
         return $this->sitekey;
-    }
-
-    public function getExplicitJsLoader(): string
-    {
-        return $this->explicitJsLoader;
     }
 
     public function isEnabled(): bool
