@@ -83,6 +83,7 @@ class CloudflareTurnstileType extends AbstractType
         }
 
         $resolver->setDefaults([
+            'individual_explicit_js_loader' => '',
             'mapped' => false,
             'constraints' => [
                 $cloudflareTurnstileCaptchaConstraint
@@ -168,6 +169,7 @@ class CloudflareTurnstileType extends AbstractType
         $view->vars['attr']['class'] = $options['attr']['class'];
         $view->vars['sitekey'] = $this->sitekey;
         $view->vars['explicit_js_loader'] = self::$explicitJsLoader;
+        $view->vars['individual_explicit_js_loader'] = $options['individual_explicit_js_loader'];
         $view->vars['enabled'] = $this->enabled;
         $view->vars['required'] = $options['required'];
         $view->vars['compatibility_mode'] = self::$compatibilityMode;

@@ -126,33 +126,70 @@ class CloudflareTurnstileTypeIntegrationTest extends KernelTestCase
         $this->assertMatchesRegularExpression('#<div id="cloudflareTurnstileWidget" data-sitekey="sitekey" class="cf-turnstile" data-response-field-name="cf-turnstile-response" data-test-attr="test" data-test-attr-two="" data-test-attr-three="data-test-attr-three"></div>#', $this->renderWidget($options));
     }
 
-    public function testCaptchaCloudflareTurnstileScriptIsNotDuplicatedIfRenderedTwice(): void
+    public function testCaptchaCloudflareTurnstileScriptIsNotDuplicatedIfRenderedMultipleTimes(): void
     {
         $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $this->renderWidget());
         $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $this->renderWidget());
     }
 
-    public function testCaptchaWidgetHandlerScriptIsNotDuplicatedIfRenderedTwice(): void
+    /**
+     * @dataProvider customOptionsForCheckingResourcesAreNotDuplicated
+     */
+    public function testCaptchaWidgetHandlerResourcesAreNotDuplicated(array $firstOptions, array $secondOptions): void
+    {
+        $firstWidgetRenderingNoOption = $this->renderWidget();
+        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $firstWidgetRenderingNoOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $firstWidgetRenderingNoOption);
+
+        $secondWidgetRenderingRequiredOption = $this->renderWidget($firstOptions);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $secondWidgetRenderingRequiredOption);
+        $this->assertStringContainsString('zmkr_cloudflare_turnstile_widget_handler', $secondWidgetRenderingRequiredOption);
+
+        $thirthWidgetRenderingOnloadOption = $this->renderWidget($secondOptions);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $thirthWidgetRenderingOnloadOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $thirthWidgetRenderingOnloadOption);
+
+        $fourthWidgetRenderingNoOption = $this->renderWidget();
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $fourthWidgetRenderingNoOption);
+        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $fourthWidgetRenderingNoOption);
+    }
+
+    public function testCaptchaWidgetRenderingForRequiredOptionPreventsDuplication(): void
     {
         $firstWidgetRenderingNoRequiredOption = $this->renderWidget();
-        $this->assertStringContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $firstWidgetRenderingNoRequiredOption);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $firstWidgetRenderingNoRequiredOption);
         $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $firstWidgetRenderingNoRequiredOption);
 
         $secondWidgetRenderingRequiredOption = $this->renderWidget(['required' => true]);
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $secondWidgetRenderingRequiredOption);
-        $this->assertStringContainsString('zmkr_cloudflare_turnstile_widget_handler', $secondWidgetRenderingRequiredOption);
         $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $secondWidgetRenderingRequiredOption);
 
         $thirthWidgetRenderingRequiredOption = $this->renderWidget(['required' => true]);
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $thirthWidgetRenderingRequiredOption);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $thirthWidgetRenderingRequiredOption);
         $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.required(.*"' . CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME . '".*)#', $thirthWidgetRenderingRequiredOption);
 
         $fourthWidgetRenderingNoRequiredOption = $this->renderWidget();
-        $this->assertStringNotContainsString('https://challenges.cloudflare.com/turnstile/v0/api.js', $fourthWidgetRenderingNoRequiredOption);
-        $this->assertStringNotContainsString('zmkr_cloudflare_turnstile_widget_handler', $fourthWidgetRenderingNoRequiredOption);
         $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.required', $fourthWidgetRenderingNoRequiredOption);
+    }
+
+    public function testCaptchaWidgetRenderingForOnloadOptionPreventsDuplication(): void
+    {
+        $firstWidgetRenderingNoOnloaddOption = $this->renderWidget();
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.onload', $firstWidgetRenderingNoOnloaddOption);
+
+        $secondWidgetRenderingOnloadOption = $this->renderWidget(['id' => 'individual_explicit_js_loader_test', 'individual_explicit_js_loader' => 'cloudflareTurnstileLoader']);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*individual_explicit_js_loader_test.*cloudflareTurnstileLoader.*)#', $secondWidgetRenderingOnloadOption);
+
+        $thirthWidgetRenderingOnloadOption = $this->renderWidget(['id' => 'individual_explicit_js_loader_test', 'individual_explicit_js_loader' => 'cloudflareTurnstileLoader2']);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*individual_explicit_js_loader_test.*cloudflareTurnstileLoader.*)#', $thirthWidgetRenderingOnloadOption);
+
+        $fourthWidgetRenderingNoOnloadOption = $this->renderWidget();
+        $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.onload', $fourthWidgetRenderingNoOnloadOption);
+    }
+
+    public function customOptionsForCheckingResourcesAreNotDuplicated(): iterable
+    {
+        yield [['required' => true], []];
+        yield [['required' => true], ['individual_explicit_js_loader' => 'cloudflareTurnstileLoader']];
+        yield [['individual_explicit_js_loader' => 'cloudflareTurnstileLoader'], ['required' => true]];
+        yield [['individual_explicit_js_loader' => 'cloudflareTurnstileLoader'], []];
     }
 
     protected static function getKernelClass(): string
