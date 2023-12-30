@@ -6,8 +6,8 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * Configuration class for the Cloudflare Turnstile bundle.
- * This class defines the Turnstile bundle required configuration properties.
+ * Configuration tree class for Cloudflare Turnstile bundle.
+ * Defines and configures required and optional properties of the bundle.
  */
 class Configuration implements ConfigurationInterface
 {
@@ -29,10 +29,10 @@ class Configuration implements ConfigurationInterface
                             ->cannotBeEmpty()
                         ->end()
                         ->scalarNode('explicit_js_loader')
-                            ->defaultValue('')
+                            ->defaultNull()
                         ->end()
                         ->scalarNode('compatibility_mode')
-                            ->defaultValue('')
+                            ->defaultNull()
                         ->end()
                         ->booleanNode('enabled')
                             ->defaultTrue()

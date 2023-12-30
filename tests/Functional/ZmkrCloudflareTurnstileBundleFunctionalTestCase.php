@@ -5,6 +5,10 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Functional;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\PantherTestCase;
 
+/**
+ * JavaScript CloudflareTurnstile widget handler base test class.
+ * Instantiate and setup JavaScript widget handler Cloudflare Tursntile bundle module.
+ */
 abstract class ZmkrCloudflareTurnstileBundleFunctionalTestCase extends PantherTestCase
 {
     protected Client $client;

@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 /**
  * Extension class for the Cloudflare Turnstile Bundle.
- * This class is responsible for loading the properties required for the captcha system.
+ * Responsible for loading the properties required by the captcha system for bundle services.
  */
 class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExtensionInterface
 {
@@ -33,7 +33,7 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
     /**
      * Recursively processes and configures container parameters based on nested user configuration
      *
-     * @param ContainerBuilder $container The Symfony service container
+     * @param ContainerBuilder $container The Symfony service container builder
      * @param array<string, mixed> $config The configuration array to process
      * @param array<string> $excludedDefinitions The definitions to exclude from container registration (unnecessary records)
      * @param string $rootKey The root key for parameter names (used for recursive calls to increase parameter level)
@@ -58,14 +58,14 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
     /**
      * Integrates the Twig view associated to the Cloudflare Turnstile captcha widget
      *
-     * @param ContainerBuilder $containerBuilder Builder of container definitions
+     * @param ContainerBuilder $container Builder of container definitions
      *
      * @throws InvalidConfigurationException If the Twig bundle is not loaded
      */
-    public function prepend(ContainerBuilder $containerBuilder): void
+    public function prepend(ContainerBuilder $container): void
     {
-        if ($containerBuilder->hasExtension('twig')) {
-            $containerBuilder->prependExtensionConfig('twig', [
+        if ($container->hasExtension('twig')) {
+            $container->prependExtensionConfig('twig', [
                 'form_themes' => ['@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig']
             ]);
         } else {

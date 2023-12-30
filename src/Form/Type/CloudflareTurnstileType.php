@@ -3,6 +3,7 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Exception\InvalidConfigurationException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -11,6 +12,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
@@ -48,94 +50,69 @@ class CloudflareTurnstileType extends AbstractType
         'zh-tw' => true,
     ];
 
-    private string $sitekey;
-    private bool $enabled;
-    private static string $explicitJsLoader;
-    private static string $compatibilityMode;
+    private CloudflareTurnstilePropertiesManager $propertiesManager;
 
-    /**
-     * CloudflareTurnstileType constructor
-     *
-     * @param string $sitekey The Cloudflare Turnstile sitekey for captcha integration
-     * @param bool $enabled Flag indicating whether the captcha is enabled
-     * @param string $explicitJsLoader If explicit loading is used, the referenced function will be called to load the captcha instead of using the default loading process
-     * @param string $compatibilityMode Compatibility flag with other captchas (@see https://developers.cloudflare.com/turnstile/migration/)
-     */
-    public function __construct(string $sitekey, bool $enabled, string $explicitJsLoader = '', string $compatibilityMode = '')
+    public function __construct(CloudflareTurnstilePropertiesManager $propertiesManager)
     {
-        $this->sitekey = $sitekey;
-        $this->enabled = $enabled;
-        self::$compatibilityMode = $compatibilityMode;
-        self::$explicitJsLoader = $explicitJsLoader;
+        $this->propertiesManager = $propertiesManager;
     }
 
     /**
      * Automatically configures and normalizes Cloudflare Turnstile captcha options for easy integration
-     *
-     * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
-
-        if (self::$compatibilityMode === 'recaptcha') {
-            $cloudflareTurnstileCaptchaConstraint->responseFieldName = 'g-recaptcha-response';
-        }
-
         $resolver->setDefaults([
-            'individual_explicit_js_loader' => '',
+            'individual_explicit_js_loader' => null,
             'mapped' => false,
             'constraints' => [
-                $cloudflareTurnstileCaptchaConstraint
+                new CloudflareTurnstileCaptcha()
             ]
         ]);
 
         $resolver->setNormalizer('attr', function (Options $options, array $attributes) {
             if (isset($attributes['data-language'])) {
-                if (!\is_string($attributes['data-language'])) {
+                if (!\is_string($attributes['data-language']) && !(\is_object($attributes['data-language']) && method_exists($attributes['data-language'], '__toString'))) {
                     throw new InvalidOptionsException('The Cloudflare Turnstile captcha language must be represented by a supported language code');
                 }
 
-                $autoConvertedLocale = str_replace('_', '-', strtolower($attributes['data-language']));
-
-                if (!isset(self::SUPPORTED_LANGUAGES_LOCALES[$autoConvertedLocale])) {
-                    throw new InvalidOptionsException(sprintf('The %s locale is not supported by Cloudflare Turnstile', $autoConvertedLocale));
-                }
-
-                $attributes['data-language'] = $autoConvertedLocale;
+                $attributes['data-language'] = str_replace('_', '-', strtolower((string) $attributes['data-language']));
             }
 
             if (isset($attributes['class']) && !\is_scalar($attributes['class']) && !(\is_object($attributes['class']) && method_exists($attributes['class'], '__toString'))) {
                 throw new InvalidOptionsException('Cloudflare Turnstile captcha widget class must be stringable');
             }
 
-            $attributes['class'] = isset($attributes['class']) && $attributes['class'] ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
+            $attributes['class'] = isset($attributes['class']) && (string) $attributes['class'] && !\is_bool($attributes['class']) ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
 
             return $attributes;
         });
     }
 
     /**
-     * Cloudflare Turnstile captcha options are checked for consistency during form building
+     * Builds the form.
      *
-     * {@inheritdoc}
+     * Cloudflare Turnstile captcha options are checked for consistency during form building.
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if (!isset($options['constraints'][0]) || !$options['constraints'][0] instanceof CloudflareTurnstileCaptcha) {
-            throw new InvalidOptionsException('The first constraint of the Cloudflare Turnstile captcha must be an instance of a Cloudflare Turnstile captcha constraint');
+            throw new InvalidConfigurationException('The first constraint of the Cloudflare Turnstile captcha must be an instance of a Cloudflare Turnstile captcha constraint');
         }
 
-        if (isset($options['attr']['data-response-field-name']) && $options['attr']['data-response-field-name'] !== $options['constraints'][0]->responseFieldName) {
-            throw new InvalidOptionsException('data-response-field-name attribute must equals the constraint response field name');
+        if (isset($options['attr']['data-language']) && !isset(self::SUPPORTED_LANGUAGES_LOCALES[$options['attr']['data-language']])) {
+            throw new InvalidOptionsException(sprintf('The %s locale is not supported by Cloudflare Turnstile or current bundle version', $options['attr']['data-language']));
+        }
+
+        if (isset($options['individual_explicit_js_loader']) && !\is_scalar($options['individual_explicit_js_loader']) && !(\is_object($options['individual_explicit_js_loader']) && method_exists($options['individual_explicit_js_loader'], '__toString'))) {
+            throw new InvalidOptionsException('Cloudflare Turnstile captcha individual widget explicit JavaScript loader must be stringable');
         }
     }
 
     /**
-     * Injects the required captcha view parameters.
-     * Checks that the form only contains at most one Cloudflare Turnstile captcha.
+     * Builds the view by injecting the required captcha view parameters.
      *
-     * {@inheritdoc}
+     * Checks that the form only contains at most one Cloudflare Turnstile captcha.
      */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
@@ -166,18 +143,12 @@ class CloudflareTurnstileType extends AbstractType
             throw new LogicException('Unable to add multiple Cloudflare Turnstile captchas to the same form');
         }
 
-        $view->vars['attr']['class'] = $options['attr']['class'];
-        $view->vars['sitekey'] = $this->sitekey;
-        $view->vars['explicit_js_loader'] = self::$explicitJsLoader;
+        $view->vars['explicit_js_loader'] = &$this->propertiesManager->getExplicitJsLoader();
         $view->vars['individual_explicit_js_loader'] = $options['individual_explicit_js_loader'];
-        $view->vars['enabled'] = $this->enabled;
-        $view->vars['required'] = $options['required'];
-        $view->vars['compatibility_mode'] = self::$compatibilityMode;
-
-        /** @var CloudflareTurnstileCaptcha */
-        $cloudflareTurnstileCaptchaConstraint = $options['constraints'][0];
-        $view->vars['response_field_name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
-        $view->vars['attr']['data-response-field-name'] = $cloudflareTurnstileCaptchaConstraint->responseFieldName;
+        $view->vars['compatibility_mode'] = &$this->propertiesManager->getCompatibilityMode();
+        $view->vars['enabled'] = $this->propertiesManager->isEnabled();
+        $view->vars['attr']['data-sitekey'] = $this->propertiesManager->getSitekey();
+        $view->vars['attr']['data-response-field-name'] = $view->vars['full_name'];
     }
 
     public function getBlockPrefix(): string
@@ -186,55 +157,13 @@ class CloudflareTurnstileType extends AbstractType
     }
 
     /**
-     * Returns the Turnstile captcha input type.
+     * Returns the Cloudflare Turnstile captcha input type.
      *
-     * Since the returned input data is linked to a hidden field, the captcha is considered hidden,
-     * even though the captcha module may appear to the user for validation/verification, depending on the configuration parameters.
-     *
-     * @return string Turnstile captcha input type
+     * Since the returned response token is linked to a hidden field, the captcha is considered hidden,
+     * even though the captcha module may appear to the user for validation/verification, depending on provided configuration parameters.
      */
     public function getParent(): string
     {
         return HiddenType::class;
-    }
-
-    public static function setExplicitJsLoader(?string $explicitJsLoader): void
-    {
-        self::$explicitJsLoader = $explicitJsLoader ?? '';
-    }
-
-    public static function isExplicitModeEnabled(): bool
-    {
-        return self::$explicitJsLoader !== '';
-    }
-
-    public static function getExplicitJsLoader(): string
-    {
-        return self::$explicitJsLoader;
-    }
-
-    public static function setCompatibilityMode(?string $compatibilityMode): void
-    {
-        self::$compatibilityMode = $compatibilityMode ?? '';
-    }
-
-    public static function isCompatibilityModeEnabled(string $compatibilityMode = ''): bool
-    {
-        return self::$compatibilityMode && self::$compatibilityMode === $compatibilityMode;
-    }
-
-    public static function getCompatibilityMode(): string
-    {
-        return self::$compatibilityMode;
-    }
-
-    public function getSitekey(): string
-    {
-        return $this->sitekey;
-    }
-
-    public function isEnabled(): bool
-    {
-        return $this->enabled;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Form\Type;
 
+use Symfony\Component\Form\Exception\InvalidConfigurationException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormInterface;
@@ -10,25 +11,30 @@ use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;;
+
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
- * Test class asserting that Cloudflare Turnstile form field data is consistent and
+ * CloudflareTurnstileType test class.
+ * Checks that the form type and its options are correctly configured and conform to the properties provided.
  */
 class CloudflareTurnstileTypeTest extends TypeTestCase
 {
+    private CloudflareTurnstilePropertiesManager $propertiesManager;
     private CloudflareTurnstileType $type;
 
     const CAPTCHA_SITEKEY = 'sitekey';
 
     public function setUp(): void
     {
-        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, true));
+        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
     }
 
-    private function initializeFormTypeFactory(CloudflareTurnstileType $type): void
+    private function initializeFormTypeFactory(CloudflareTurnstilePropertiesManager $propertiesManager): void
     {
-        $this->type = $type;
+        $this->propertiesManager = $propertiesManager;
+        $this->type = new CloudflareTurnstileType($this->propertiesManager);
         parent::setUp();
     }
 
@@ -53,7 +59,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
      */
     public function testCaptchaWithInvalidConstraintThrowsException(array $invalidCaptchaConstraintsConfiguration): void
     {
-        $this->expectException(InvalidOptionsException::class);
+        $this->expectException(InvalidConfigurationException::class);
 
         $this->factory->create(CloudflareTurnstileType::class, null, $invalidCaptchaConstraintsConfiguration);
     }
@@ -61,129 +67,81 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
     public function testCaptchaDefaultFormTypeVars(): void
     {
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
-        $cloudflareTurnstileCaptchaConstraint = new CloudflareTurnstileCaptcha();
 
-        $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['sitekey']);
+        $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['attr']['data-sitekey']);
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
         $this->assertTrue($formView->vars['enabled']);
         $this->assertEmpty($formView->vars['explicit_js_loader']);
         $this->assertEmpty($formView->vars['compatibility_mode']);
-        $this->assertSame($formView->vars['response_field_name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
-        $this->assertSame($formView->vars['attr']['data-response-field-name'], $cloudflareTurnstileCaptchaConstraint->responseFieldName);
+        $this->assertFalse($formView->vars['required']);
+        $this->assertNotEmpty($formView->vars['full_name']);
+        $this->assertSame($formView->vars['full_name'], $formView->vars['attr']['data-response-field-name']);
     }
 
     public function testCaptchaExplicitRenderingMode(): void
     {
-        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, true, 'cloudflareTurnstileLoader'));
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-        $formView = $form->createView();
-        $this->assertSame('cloudflareTurnstileLoader', $formView->vars['explicit_js_loader']);
-        $this->assertTrue(CloudflareTurnstileType::isExplicitModeEnabled());
+        $this->propertiesManager->setExplicitJsLoader('cloudflareTurnstileLoader');
 
-        CloudflareTurnstileType::setExplicitJsLoader('cloudflareTurnstileLoader2');
-        $formView = $form->createView();
-        $this->assertSame('cloudflareTurnstileLoader2', $formView->vars['explicit_js_loader']);
-        $this->assertTrue(CloudflareTurnstileType::isExplicitModeEnabled());
+        $firstForm = $this->factory->create(CloudflareTurnstileType::class);
+        $firstFormView = $firstForm->createView();
 
-        CloudflareTurnstileType::setExplicitJsLoader('cloudflareTurnstileLoader3');
-        $formView = $form->createView();
-        $this->assertSame('cloudflareTurnstileLoader3', $formView->vars['explicit_js_loader']);
-        $this->assertTrue(CloudflareTurnstileType::isExplicitModeEnabled());
+        $this->assertSame('cloudflareTurnstileLoader', $firstFormView->vars['explicit_js_loader']);
 
-        CloudflareTurnstileType::setExplicitJsLoader(null);
-        $formView = $form->createView();
-        $this->assertSame('', $formView->vars['explicit_js_loader']);
-        $this->assertFalse(CloudflareTurnstileType::isExplicitModeEnabled());
+        $this->propertiesManager->setExplicitJsLoader('cloudflareTurnstileLoader2');
+        $firstFormView = $firstForm->createView();
 
-        CloudflareTurnstileType::setExplicitJsLoader('');
-        $formView = $form->createView();
-        $this->assertSame('', $formView->vars['explicit_js_loader']);
-        $this->assertFalse(CloudflareTurnstileType::isExplicitModeEnabled());
+        $this->assertSame('cloudflareTurnstileLoader2', $firstFormView->vars['explicit_js_loader']);
+
+        $secondForm = $this->factory->create(CloudflareTurnstileType::class);
+        $secondFormView = $secondForm->createView();
+
+        $this->assertSame('cloudflareTurnstileLoader2', $secondFormView->vars['explicit_js_loader']);
+        $this->assertSame('cloudflareTurnstileLoader2', $firstFormView->vars['explicit_js_loader']);
+
+        $this->propertiesManager->setExplicitJsLoader(null);
+        $thirthForm = $this->factory->create(CloudflareTurnstileType::class);
+        $thirthFormView = $thirthForm->createView();
+
+        $this->assertNull($thirthFormView->vars['explicit_js_loader']);
+        $this->assertNull($firstFormView->vars['explicit_js_loader']);
+        $this->assertNull($secondFormView->vars['explicit_js_loader']);
     }
 
     public function testCaptchaCompatibilityMode(): void
     {
-        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, true, '', 'hcaptcha'));
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-        $formView = $form->createView();
-        $this->assertSame('hcaptcha', $formView->vars['compatibility_mode']);
-        $this->assertTrue(CloudflareTurnstileType::isCompatibilityModeEnabled('hcaptcha'));
+        $this->propertiesManager->setCompatibilityMode('recaptcha');
 
-        CloudflareTurnstileType::setCompatibilityMode('recaptcha');
-        $formView = $form->createView();
-        $this->assertSame('recaptcha', $formView->vars['compatibility_mode']);
-        $this->assertTrue(CloudflareTurnstileType::isCompatibilityModeEnabled('recaptcha'));
+        $firstForm = $this->factory->create(CloudflareTurnstileType::class);
+        $firstFormView = $firstForm->createView();
 
-        CloudflareTurnstileType::setCompatibilityMode('hcaptcha');
-        $formView = $form->createView();
-        $this->assertSame('hcaptcha', $formView->vars['compatibility_mode']);
-        $this->assertTrue(CloudflareTurnstileType::isCompatibilityModeEnabled('hcaptcha'));
+        $this->assertSame('recaptcha', $firstFormView->vars['compatibility_mode']);
 
-        CloudflareTurnstileType::setCompatibilityMode(null);
-        $formView = $form->createView();
-        $this->assertSame('', $formView->vars['compatibility_mode']);
-        $this->assertFalse(CloudflareTurnstileType::isCompatibilityModeEnabled());
+        $this->propertiesManager->setCompatibilityMode('hcaptcha');
+        $firstFormView = $firstForm->createView();
 
-        CloudflareTurnstileType::setCompatibilityMode('');
-        $formView = $form->createView();
-        $this->assertSame('', $formView->vars['compatibility_mode']);
-        $this->assertFalse(CloudflareTurnstileType::isCompatibilityModeEnabled());
-    }
+        $this->assertSame('hcaptcha', $firstFormView->vars['compatibility_mode']);
 
-    public function testCaptchaResponseFieldNameWithReCaptchaCompatibilityMode(): void
-    {
-        CloudflareTurnstileType::setCompatibilityMode('recaptcha');
+        $secondForm = $this->factory->create(CloudflareTurnstileType::class);
+        $secondFormView = $secondForm->createView();
 
-        $form = $this->factory->create(CloudflareTurnstileType::class);
-        $formView = $form->createView();
+        $this->assertSame('hcaptcha', $secondFormView->vars['compatibility_mode']);
+        $this->assertSame('hcaptcha', $firstFormView->vars['compatibility_mode']);
 
-        /** @var CloudflareTurnstileCaptcha */
-        $cloudflareTurnstileCaptchaConstraint = $form->getConfig()->getOption('constraints')[0];
+        $this->propertiesManager->setCompatibilityMode(null);
+        $thirthForm = $this->factory->create(CloudflareTurnstileType::class);
+        $thirthFormView = $thirthForm->createView();
 
-        $this->assertSame('g-recaptcha-response', $cloudflareTurnstileCaptchaConstraint->responseFieldName);
-        $this->assertSame('g-recaptcha-response', $formView->vars['response_field_name']);
-
-        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
-            'constraints' => [
-                new CloudflareTurnstileCaptcha(null, 'g-recaptcha-test-response')
-            ]
-        ]);
-        $formView = $form->createView();
-
-        /** @var CloudflareTurnstileCaptcha */
-        $cloudflareTurnstileCaptchaConstraint = $form->getConfig()->getOption('constraints')[0];
-
-        $this->assertSame('g-recaptcha-test-response', $cloudflareTurnstileCaptchaConstraint->responseFieldName);
-        $this->assertSame('g-recaptcha-test-response', $formView->vars['response_field_name']);
+        $this->assertNull($thirthFormView->vars['compatibility_mode']);
+        $this->assertNull($firstFormView->vars['compatibility_mode']);
+        $this->assertNull($secondFormView->vars['compatibility_mode']);
     }
 
     public function testCaptchaFormTypeDisabledFlag(): void
     {
-        $this->initializeFormTypeFactory(new CloudflareTurnstileType(self::CAPTCHA_SITEKEY, false));
+        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, false));
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertFalse($formView->vars['enabled']);
-    }
-
-    /**
-     * @dataProvider validCaptchaResponseFieldNameConfigurations
-     */
-    public function testValidCaptchaResponseFieldNameConfiguration(array $captchaResponseFieldNameConfiguration, string $expectedResponseFieldName): void
-    {
-        $formView = $this->factory->create(CloudflareTurnstileType::class, null, $captchaResponseFieldNameConfiguration)->createView();
-
-        $this->assertSame($formView->vars['response_field_name'], $expectedResponseFieldName);
-        $this->assertSame($formView->vars['attr']['data-response-field-name'], $expectedResponseFieldName);
-    }
-
-    /**
-     * @dataProvider invalidCaptchaResponseFieldNameConfigurations
-     */
-    public function testCaptchaInconsistentResponseFieldNameConfigurationThrowsException(array $inconsistentResponseFieldNameCaptchaConfiguration): void
-    {
-        $this->expectException(InvalidOptionsException::class);
-
-        $this->factory->create(CloudflareTurnstileType::class, null, $inconsistentResponseFieldNameCaptchaConfiguration);
     }
 
     /**
@@ -198,6 +156,23 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         ])->createView();
 
         $this->assertSame($expectedLocale, $formView->vars['attr']['data-language']);
+    }
+
+    public function testCaptchaLanguageConfigurationWithValidLocaleAsStringableObject(): void
+    {
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-language' => new class
+                {
+                    public function __toString()
+                    {
+                        return 'EN';
+                    }
+                }
+            ]
+        ])->createView();
+
+        $this->assertSame('en', $formView->vars['attr']['data-language']);
     }
 
     public function testCaptchaLanguageConfigurationWithUnsupportedLocaleThrowsException(): void
@@ -235,7 +210,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
             ]
         ]);
 
-        $this->assertSame($form->createView()->vars['attr']['class'], $expectedClass);
+        $this->assertSame($expectedClass, $form->createView()->vars['attr']['class']);
     }
 
     /**
@@ -251,7 +226,23 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
             ]
         ]);
 
-        $this->assertSame($form->createView()->vars['attr']['class'], $expectedClass);
+        $this->assertSame($expectedClass, $form->createView()->vars['attr']['class']);
+    }
+
+    /**
+     * The class attribute must be prepended with cf-turnstile class if provided data is mixed and does not contain cf-turnstile
+     *
+     * @dataProvider classesWithMixedData
+     */
+    public function testTurnstileClassWithMixedData($providedClass, string $expectedClass): void
+    {
+        $form = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'class' => $providedClass
+            ]
+        ]);
+
+        $this->assertSame($expectedClass, $form->createView()->vars['attr']['class']);
     }
 
     public function testCaptchaFormTypeResponseOnSubmitIsCorrect(): void
@@ -295,67 +286,9 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         yield [
             [
-                'constraints' => null
-            ]
-        ];
-
-        yield [
-            [
                 'constraints' => [
                     new NotBlank(),
                     new CloudflareTurnstileCaptcha()
-                ]
-            ]
-        ];
-    }
-
-    public function validCaptchaResponseFieldNameConfigurations(): iterable
-    {
-        yield [
-            [],
-            CloudflareTurnstileCaptcha::DEFAULT_RESPONSE_FIELD_NAME
-        ];
-
-        yield [
-            [
-                'constraints' => [
-                    new CloudflareTurnstileCaptcha(null, 'cf-turnstile-test-response')
-                ]
-            ],
-            'cf-turnstile-test-response'
-        ];
-
-        yield [
-            [
-                'attr' => [
-                    'data-response-field-name' => 'cf-turnstile-test-response-2'
-                ],
-                'constraints' => [
-                    new CloudflareTurnstileCaptcha(null, 'cf-turnstile-test-response-2')
-                ]
-            ],
-            'cf-turnstile-test-response-2'
-        ];
-    }
-
-    public function invalidCaptchaResponseFieldNameConfigurations(): iterable
-    {
-        yield [
-            [
-                'attr' => [
-                    'data-response-field-name' => 'cf-turnstile-test-response'
-                ],
-                'constraints' => [
-                    new CloudflareTurnstileCaptcha(null, 'cf-turnstile-test-response-2')
-                ]
-            ]
-        ];
-
-        yield [
-            [
-                'attr' => [
-                    // Not allowed since it is different than the default one and a custom constraint is not used
-                    'data-response-field-name' => 'cf-turnstile-test-response'
                 ]
             ]
         ];
@@ -403,9 +336,24 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         yield ['test cf-turnstilea cf-turnstile test2', 'test cf-turnstilea cf-turnstile test2'];
     }
 
+    public function classesWithMixedData(): iterable
+    {
+        yield [true, 'cf-turnstile'];
+        yield [false, 'cf-turnstile'];
+        yield [0, 'cf-turnstile'];
+        yield [1, 'cf-turnstile 1'];
+        yield [new class
+        {
+            public function __toString()
+            {
+                return "";
+            }
+        }, 'cf-turnstile'];
+    }
+
     public function formsWithMultipleCaptchas(): iterable
     {
-        $this->setUp();
+        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
 
         yield [
             $this->factory->createBuilder()
@@ -500,7 +448,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
     public function formsWithSingleCaptcha(): iterable
     {
-        $this->setUp();
+        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
 
         yield [
             $this->factory->createBuilder()

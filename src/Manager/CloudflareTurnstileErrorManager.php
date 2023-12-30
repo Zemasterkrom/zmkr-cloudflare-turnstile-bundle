@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\ErrorManager;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Manager;
 
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileException;
 

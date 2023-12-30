@@ -4,8 +4,9 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
 use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
-use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
+use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
+use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Twig\UniqueMarkupIncluderExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
@@ -13,33 +14,36 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->defaults()
-        ->autowire()
-        ->autoconfigure();
+        ->private();
 
-    $services->set('zmkr_cloudflare_turnstile.services.type', CloudflareTurnstileType::class)
+    $services->set('zmkr_cloudflare_turnstile.services.manager.properties_manager', CloudflareTurnstilePropertiesManager::class)
+        ->arg(0, '%zmkr_cloudflare_turnstile.parameters.captcha.sitekey%')
+        ->arg(1, '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%')
+        ->arg(2, '%zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader%')
+        ->arg(3, '%zmkr_cloudflare_turnstile.parameters.captcha.compatibility_mode%');
+
+    $services->alias(CloudflareTurnstilePropertiesManager::class, 'zmkr_cloudflare_turnstile.services.manager.properties_manager');
+
+    $services->set('zmkr_cloudflare_turnstile.services.type.type', CloudflareTurnstileType::class)
         ->tag('form.type')
-        ->arg('$sitekey', '%zmkr_cloudflare_turnstile.parameters.captcha.sitekey%')
-        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%')
-        ->arg('$explicitJsLoader', '%zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader%')
-        ->arg('$compatibilityMode', '%zmkr_cloudflare_turnstile.parameters.captcha.compatibility_mode%');
+        ->arg(0, new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.manager.properties_manager'));
 
-    $services->set('zmkr_cloudflare_turnstile.services.validator', CloudflareTurnstileCaptchaValidator::class)
+    $services->set('zmkr_cloudflare_turnstile.services.validator.validator', CloudflareTurnstileCaptchaValidator::class)
         ->tag('validator.constraint_validator')
-        ->arg('$cloudflareTurnstileErrorManager', new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.error_manager'))
-        ->arg('$cloudflareTurnstileClient', new ReferenceConfigurator(CloudflareTurnstileClientInterface::class))
-        ->arg('$enabled', '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%');
+        ->arg(0, new ReferenceConfigurator(CloudflareTurnstileClientInterface::class))
+        ->arg(1, new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.manager.error_manager'))
+        ->arg(2, '%zmkr_cloudflare_turnstile.parameters.captcha.enabled%');
 
-    $services->set('zmkr_cloudflare_turnstile.services.error_manager', CloudflareTurnstileErrorManager::class)
-        ->arg('$throwOnCoreFailure', '%zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure%');
+    $services->set('zmkr_cloudflare_turnstile.services.manager.error_manager', CloudflareTurnstileErrorManager::class)
+        ->arg(0, '%zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure%');
 
-    $services->set('zmkr_cloudflare_turnstile.services.client', CloudflareTurnstileClient::class)
-        ->arg('$secretKey', '%zmkr_cloudflare_turnstile.parameters.captcha.secret_key%')
-        ->arg('$options', '%zmkr_cloudflare_turnstile.parameters.http_client.timeout%');
+    $services->set('zmkr_cloudflare_turnstile.services.client.client', CloudflareTurnstileClient::class)
+        ->arg(0, new ReferenceConfigurator('http_client'))
+        ->arg(1, '%zmkr_cloudflare_turnstile.parameters.captcha.secret_key%')
+        ->arg(2, '%zmkr_cloudflare_turnstile.parameters.http_client.options%');
 
-    $services->set(CloudflareTurnstileClientInterface::class, CloudflareTurnstileClient::class)
-        ->arg('$secretKey', '%zmkr_cloudflare_turnstile.parameters.captcha.secret_key%')
-        ->arg('$options', '%zmkr_cloudflare_turnstile.parameters.http_client.options%');
+    $services->alias(CloudflareTurnstileClientInterface::class, 'zmkr_cloudflare_turnstile.services.client.client');
 
-    $services->set('zmkr_cloudflare_turnstile.services.unique_markup_includer_extension', UniqueMarkupIncluderExtension::class)
+    $services->set('zmkr_cloudflare_turnstile.services.twig.unique_markup_includer_extension', UniqueMarkupIncluderExtension::class)
         ->tag('twig.extension');
 };

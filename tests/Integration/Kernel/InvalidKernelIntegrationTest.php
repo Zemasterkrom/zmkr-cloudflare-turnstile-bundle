@@ -7,7 +7,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\InvalidBundleTestingKernel;
 
 /**
- * Integration test class that asserts that the bundle cannot start without the Twig Bundle
+ * Kernel test class asserting that the bundle cannot start without Twig
  */
 class InvalidKernelIntegrationTest extends KernelTestCase
 {

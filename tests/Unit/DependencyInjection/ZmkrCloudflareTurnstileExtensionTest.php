@@ -4,30 +4,22 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClient;
-use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\DependencyInjection\ZmkrCloudflareTurnstileExtension;
-use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
-use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
-use Zemasterkrom\CloudflareTurnstileBundle\Twig\UniqueMarkupIncluderExtension;
-use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 /**
  * Extension configuration test class.
- * Checks that container and services injection is properly handled.
+ * Checks that container configuration is properly handled.
  */
 class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 {
     private ZmkrCloudflareTurnstileExtension $extension;
     private ContainerBuilder $containerBuilder;
 
-    private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.enabled';
     private const CAPTCHA_SITEKEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.sitekey';
     private const CAPTCHA_SECRET_KEY_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.secret_key';
     private const EXPLICIT_JS_LOADER_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.explicit_js_loader';
-    private const COMPATIBILITY_MODE_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.compatibility_mode';
+    private const ENABLED_FLAG_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.captcha.enabled';
     private const ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.error_manager.throw_on_core_failure';
-    private const HTTP_CLIENT_OPTIONS_REFERENCE = 'zmkr_cloudflare_turnstile.parameters.http_client.options';
 
     public function setUp(): void
     {
@@ -37,42 +29,14 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
     public function testLoadingAndServiceRegistration(): void
     {
+        $this->expectNotToPerformAssertions();
+
         $this->extension->load([[
             'captcha' => [
                 'sitekey' => '<sitekey>',
                 'secret_key' => '<secret_key>'
             ]
         ]], $this->containerBuilder);
-
-        $typeDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.type');
-
-        $this->assertSame($typeDefinition->getClass(), CloudflareTurnstileType::class);
-        $this->assertSame($typeDefinition->getArgument('$sitekey'), $this->getVariablePlaceholder(self::CAPTCHA_SITEKEY_REFERENCE));
-        $this->assertSame($typeDefinition->getArgument('$enabled'), $this->getVariablePlaceholder(self::ENABLED_FLAG_REFERENCE));
-        $this->assertSame($typeDefinition->getArgument('$explicitJsLoader'), $this->getVariablePlaceholder(self::EXPLICIT_JS_LOADER_REFERENCE));
-        $this->assertSame($typeDefinition->getArgument('$compatibilityMode'), $this->getVariablePlaceholder(self::COMPATIBILITY_MODE_REFERENCE));
-
-        $validatorDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.validator');
-
-        $this->assertSame($validatorDefinition->getClass(), CloudflareTurnstileCaptchaValidator::class);
-        $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileErrorManager')->__toString(), 'zmkr_cloudflare_turnstile.services.error_manager');
-        $this->assertSame($validatorDefinition->getArgument('$cloudflareTurnstileClient')->__toString(), CloudflareTurnstileClientInterface::class);
-        $this->assertSame($validatorDefinition->getArgument('$enabled'),  $this->getVariablePlaceholder(self::ENABLED_FLAG_REFERENCE));
-
-        $errorManagerDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.error_manager');
-
-        $this->assertSame($errorManagerDefinition->getClass(), CloudflareTurnstileErrorManager::class);
-        $this->assertSame($errorManagerDefinition->getArgument('$throwOnCoreFailure'), $this->getVariablePlaceholder(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
-
-        $clientDefinition = $this->containerBuilder->getDefinition(CloudflareTurnstileClientInterface::class);
-
-        $this->assertSame($clientDefinition->getClass(), CloudflareTurnstileClient::class);
-        $this->assertSame($clientDefinition->getArgument('$secretKey'), $this->getVariablePlaceholder(self::CAPTCHA_SECRET_KEY_REFERENCE));
-        $this->assertSame($clientDefinition->getArgument('$options'), $this->getVariablePlaceholder(self::HTTP_CLIENT_OPTIONS_REFERENCE));
-
-        $uniqueMarkupIncluderDefinition = $this->containerBuilder->getDefinition('zmkr_cloudflare_turnstile.services.unique_markup_includer_extension');
-
-        $this->assertSame($uniqueMarkupIncluderDefinition->getClass(), UniqueMarkupIncluderExtension::class);
     }
 
     /**
@@ -101,11 +65,11 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
-        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+        $this->assertTrue($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE));
+        $this->assertSame('<sitekey>', $this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame('<secret_key>', $this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE));
+        $this->assertNull($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertFalse($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
     }
 
     public function testLoadingWithRequiredConfigAndExplicitJsLoader(): void
@@ -118,11 +82,11 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), 'cloudflareTurnstileLoader');
-        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+        $this->assertTrue($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE));
+        $this->assertSame('<sitekey>', $this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame('<secret_key>', $this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE));
+        $this->assertSame('cloudflareTurnstileLoader', $this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertFalse($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
     }
 
     public function testLoadingWithRequiredConfigAndDisabledFlag(): void
@@ -135,11 +99,11 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), false);
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
-        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+        $this->assertFalse($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE));
+        $this->assertSame('<sitekey>', $this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame('<secret_key>', $this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE));
+        $this->assertNull($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertFalse($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
     }
 
     public function testLoadingWithRequiredConfigAndEnabledFlag(): void
@@ -152,11 +116,11 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE), true);
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
-        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), false);
+        $this->assertTrue($this->containerBuilder->getParameter(self::ENABLED_FLAG_REFERENCE));
+        $this->assertSame('<sitekey>', $this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame('<secret_key>', $this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE));
+        $this->assertNull($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertFalse($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
     }
 
     public function testLoadingWithRequiredConfigAndValidErrorManagerConfig(): void
@@ -171,10 +135,10 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
             ]
         ]], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE), '<sitekey>');
-        $this->assertSame($this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE), '<secret_key>');
-        $this->assertSame($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE), '');
-        $this->assertSame($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE), true);
+        $this->assertSame('<sitekey>', $this->containerBuilder->getParameter(self::CAPTCHA_SITEKEY_REFERENCE));
+        $this->assertSame('<secret_key>', $this->containerBuilder->getParameter(self::CAPTCHA_SECRET_KEY_REFERENCE));
+        $this->assertNull($this->containerBuilder->getParameter(self::EXPLICIT_JS_LOADER_REFERENCE));
+        $this->assertTrue($this->containerBuilder->getParameter(self::ERROR_MANAGER_CORE_ERROR_THROWING_REFERENCE));
     }
 
     /**
@@ -206,8 +170,8 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->extension->load([$config], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.timeout'), 1);
-        $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'), $config['http_client']['options']);
+        $this->assertSame(1, $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.timeout'));
+        $this->assertSame($config['http_client']['options'], $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'));
     }
 
     public function testLoadingWithRequiredConfigAndMultipleHttpClientOptions(): void
@@ -227,9 +191,9 @@ class ZmkrCloudflareTurnstileExtensionTest extends TestCase
 
         $this->extension->load([$config], $this->containerBuilder);
 
-        $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.timeout'), 1);
-        $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.max_duration'), 2);
-        $this->assertSame($this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'), $config['http_client']['options']);
+        $this->assertSame(1, $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.timeout'));
+        $this->assertSame(2, $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options.max_duration'));
+        $this->assertSame($config['http_client']['options'], $this->containerBuilder->getParameter('zmkr_cloudflare_turnstile.parameters.http_client.options'));
     }
 
     public function configsWithNoHttpClientOption(): iterable

@@ -1,9 +1,9 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\ErrorManager;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Manager;
 
 use PHPUnit\Framework\TestCase;
-use Zemasterkrom\CloudflareTurnstileBundle\ErrorManager\CloudflareTurnstileErrorManager;
+use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileException;
 
 /**
@@ -17,7 +17,7 @@ class CloudflareTurnstileErrorManagerTest extends TestCase
         $this->expectException(CloudflareTurnstileException::class);
 
         $errorManager = new CloudflareTurnstileErrorManager(true);
-        $errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileException(''));
+        $errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileException());
     }
 
     public function testNoExceptionThrowingWithDisabledCoreFailureHandling(): void
@@ -25,6 +25,6 @@ class CloudflareTurnstileErrorManagerTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         $errorManager = new CloudflareTurnstileErrorManager(false);
-        $errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileException(''));
+        $errorManager->throwIfExplicitErrorsEnabled(new CloudflareTurnstileException());
     }
 }

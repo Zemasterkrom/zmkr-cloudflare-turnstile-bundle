@@ -49,7 +49,7 @@ class ConfigurationTest extends TestCase
         $this->recursiveKsort($processedConfig);
         $this->recursiveKsort($expectedProcessedConfig);
 
-        $this->assertSame($processedConfig, $expectedProcessedConfig);
+        $this->assertSame($expectedProcessedConfig, $processedConfig);
     }
 
     public function testProcessorWithNoConfigThrowsException(): void
@@ -336,8 +336,8 @@ class ConfigurationTest extends TestCase
                 'sitekey' => '<sitekey>',
                 'secret_key' => '<secret_key>',
                 'enabled' => true,
-                'explicit_js_loader' => '',
-                'compatibility_mode' => ''
+                'explicit_js_loader' => null,
+                'compatibility_mode' => null
             ],
             'error_manager' => [
                 'throw_on_core_failure' => false

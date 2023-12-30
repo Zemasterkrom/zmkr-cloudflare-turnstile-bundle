@@ -1,7 +1,7 @@
 {%- block zmkr_cloudflare_turnstile_widget -%}
     {% apply spaceless %}
         {% if enabled %}
-            <div id="{{ id }}_container">
+            <div id="{{ id }}_cloudflare_turnstile_container">
                 {% if not is_markup_already_included('cloudflare_turnstile_script') %}
                     {% set cloudflare_turnstile_script_query_parameters = [] %}
 
@@ -17,7 +17,7 @@
                         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ cloudflare_turnstile_script_query_parameters|length > 0 ? '?' ~ cloudflare_turnstile_script_query_parameters|url_encode : '' }}" defer></script>
                     {% endset %}
 
-                    {{ include_unique_markup_per_key('cloudflare_turnstile_script', cloudflare_turnstile_script) }}
+                    {{ strictly_include_unique_markup('cloudflare_turnstile_script', cloudflare_turnstile_script) }}
                 {% endif %}
 
                 {% if required or individual_explicit_js_loader is not empty %}
@@ -26,21 +26,21 @@
                             <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.4.js' )}}"></script>
                         {% endset %}
 
-                        {{ include_unique_markup_per_key('widget_handler_script', widget_handler_script) }}
+                        {{ strictly_include_unique_markup('widget_handler_script', widget_handler_script) }}
                     {% endif %}
 
                     <script>
                         {%- if required -%}
-                            window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, "{{ response_field_name }}");
+                            window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, "{{ full_name }}");
                         {%- endif -%}
 
                         {%- if individual_explicit_js_loader is not empty -%}
-                            window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}", "{{ individual_explicit_js_loader }}");
+                            window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}_cloudflare_turnstile_container_widget", "{{ individual_explicit_js_loader }}");
                         {%- endif -%}
                     </script>
                 {% endif %}
 
-                <div id="{{ id }}" data-sitekey="{{ sitekey }}" {%- for attrname, attrvalue in attr -%}
+                <div id="{{ id }}_cloudflare_turnstile_container_widget" {%- for attrname, attrvalue in attr -%}
                     {%- if attrvalue is not same as(false) -%}
                         {{- " " -}}
                     {%- endif -%}
