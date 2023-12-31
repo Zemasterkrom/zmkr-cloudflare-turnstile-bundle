@@ -5,6 +5,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Form\Type;
 use Symfony\Component\Form\Exception\InvalidConfigurationException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
@@ -257,19 +258,19 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
     }
 
     /**
-     * @dataProvider formsWithMultipleCaptchas
+     * @dataProvider formsWithSingleCaptcha
      */
-    public function testMultipleCaptchasOnSameFormIsNotAllowed(FormInterface $form): void
+    public function testFormsWithSingleCaptchaCorrectlyCreatesView(FormInterface $form): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectNotToPerformAssertions();
 
         $form->createView();
     }
 
     /**
-     * @dataProvider formsWithSingleCaptcha
+     * @dataProvider formsWithMultipleCaptchas
      */
-    public function testSingleCaptchaWithOtherFormTypeOnSameFormIsAllowed(FormInterface $form): void
+    public function testFormsWithMultipleCaptchasCorrectlyCreateView(FormInterface $form): void
     {
         $this->expectNotToPerformAssertions();
 
@@ -351,6 +352,24 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         }, 'cf-turnstile'];
     }
 
+    public function formsWithSingleCaptcha(): iterable
+    {
+        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
+
+        yield [
+            $this->factory->createBuilder()
+                ->add('turnstile_type', CloudflareTurnstileType::class)
+                ->getForm()
+        ];
+
+        yield [
+            $this->factory->createBuilder()
+                ->add('turnstile_type', CloudflareTurnstileType::class)
+                ->add('turnstile_type', CloudflareTurnstileType::class)
+                ->getForm()
+        ];
+    }
+
     public function formsWithMultipleCaptchas(): iterable
     {
         $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
@@ -365,190 +384,8 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         yield [
             $this->factory->createBuilder()
                 ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->add('test_type', HiddenType::class)
                 ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder(CloudflareTurnstileType::class, null, [
-                'compound' => true
-            ])->add('turnstile_type', CloudflareTurnstileType::class)->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                )
-                ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                        ->add('test_type', HiddenType::class)
-                )
-                ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add(
-                            $this->factory->createBuilder()
-                                ->add('turnstile_type', CloudflareTurnstileType::class)
-                        )
-                )
-                ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add(
-                            $this->factory->createBuilder()
-                                ->add('turnstile_type', CloudflareTurnstileType::class)
-                                ->add('test_type', HiddenType::class)
-                        )
-                )
-                ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                        ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                )
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                        ->add('test_type', HiddenType::class)
-                        ->add('turnstile_type_2', CloudflareTurnstileType::class)
-                )
-                ->getForm()
-        ];
-    }
-
-    public function formsWithSingleCaptcha(): iterable
-    {
-        $this->initializeFormTypeFactory(new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true));
-
-        yield [
-            $this->factory->createBuilder()
-                ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder(CloudflareTurnstileType::class, null, [
-                'compound' => true
-            ])->add('test_type', HiddenType::class)->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->add('test_type', HiddenType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add('test_type', HiddenType::class)
-                ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                )
-                ->add('test_type', HiddenType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('test_type', HiddenType::class)
-                )
-                ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                )
-                ->add('test_type', HiddenType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add(
-                            $this->factory->createBuilder()
-                                ->add('turnstile_type', CloudflareTurnstileType::class)
-                        )
-                )
-                ->add('test_type', HiddenType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add(
-                            $this->factory->createBuilder()
-                                ->add('test_type', HiddenType::class)
-                        )
-                )
-                ->add('turnstile_type', CloudflareTurnstileType::class)
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                        ->add('test_type', HiddenType::class)
-                )
-                ->getForm()
-        ];
-
-        yield [
-            $this->factory->createBuilder()
-                ->add(
-                    $this->factory->createBuilder()
-                        ->add('test_type', HiddenType::class)
-                        ->add('turnstile_type', CloudflareTurnstileType::class)
-                )
+                ->add('turnstile_type_3', CloudflareTurnstileType::class)
                 ->getForm()
         ];
     }

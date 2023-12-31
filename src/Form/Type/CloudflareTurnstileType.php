@@ -4,7 +4,6 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\InvalidConfigurationException;
-use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
@@ -111,38 +110,9 @@ class CloudflareTurnstileType extends AbstractType
 
     /**
      * Builds the view by injecting the required captcha view parameters.
-     *
-     * Checks that the form only contains at most one Cloudflare Turnstile captcha.
      */
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $instanceCounter = 0;
-        $formStack = [$form->getRoot()];
-
-        if ($form->getRoot()->getConfig()->getType()->getInnerType() instanceof self) {
-            $instanceCounter++;
-        }
-
-        while (!empty($formStack)) {
-            $currentForm = array_pop($formStack);
-
-            foreach ($currentForm->all() as $childForm) {
-                if ($childForm->getConfig()->getType()->getInnerType() instanceof self) {
-                    $instanceCounter++;
-                }
-
-                if ($instanceCounter > 1) break;
-
-                $formStack[] = $childForm;
-            }
-
-            if ($instanceCounter > 1) break;
-        }
-
-        if ($instanceCounter > 1) {
-            throw new LogicException('Unable to add multiple Cloudflare Turnstile captchas to the same form');
-        }
-
         $view->vars['explicit_js_loader'] = &$this->propertiesManager->getExplicitJsLoader();
         $view->vars['individual_explicit_js_loader'] = $options['individual_explicit_js_loader'];
         $view->vars['compatibility_mode'] = &$this->propertiesManager->getCompatibilityMode();
