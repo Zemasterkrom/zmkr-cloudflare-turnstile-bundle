@@ -3,6 +3,7 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Unit\Client;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
@@ -65,37 +66,37 @@ class CloudflareTurnstileClientTest extends TestCase
      *
      * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testClientOptionsWithVerificationOptions(array $clientOptions, array $verificationOptions, array $expectedOptions): void
+    public function testClientOptionsWithVerificationOptions(array $clientHttpOptions, array $httpVerificationOptions, array $expectedHttpOptions): void
     {
-        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
+        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientHttpOptions);
 
-        $this->assertSame($expectedOptions, $client->handleOptions($verificationOptions));
+        $this->assertSame($expectedHttpOptions, $client->handleOptions($httpVerificationOptions));
     }
 
     /**
      * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testSuccessfulClientResponseWithVerificationOptions(array $clientOptions, array $verificationOptions): void
+    public function testSuccessfulClientResponseWithVerificationOptions(array $clientHttpOptions, array $verificationHttpOptions): void
     {
         /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => true
-        ]))), '', $clientOptions);
+        ]))), '', $clientHttpOptions);
 
-        $this->assertTrue($client->verify('<captcha_response>', $verificationOptions));
+        $this->assertTrue($client->verify('<captcha_response>', $verificationHttpOptions));
     }
 
     /**
      * @dataProvider clientOptionsWithVerificationOptions
      */
-    public function testUnsuccessfulClientResponseWithVerificationOptions(array $clientOptions, array $verificationOptions): void
+    public function testUnsuccessfulClientResponseWithVerificationOptions(array $clientHttpOptions, array $httpVerificationOptions): void
     {
         /** @phpstan-ignore-next-line */
         $client = new CloudflareTurnstileClient(new MockHttpClient(new MockResponse(json_encode([
             'success' => false
-        ]))), '', $clientOptions);
+        ]))), '', $clientHttpOptions);
 
-        $this->assertFalse($client->verify('<captcha_response>', $verificationOptions));
+        $this->assertFalse($client->verify('<captcha_response>', $httpVerificationOptions));
     }
 
     /**
@@ -103,11 +104,45 @@ class CloudflareTurnstileClientTest extends TestCase
      *
      * @dataProvider clientOptionsWithVerificationOptionsCombinations
      */
-    public function testClientOptionsWithVerificationOptionsCombinations(array $clientOptions, array $firstVerificationOptions, array $secondVerificationOptions, array $expectedOptions): void
+    public function testClientOptionsWithVerificationOptionsCombinations(array $clientHttpOptions, array $firstHttpVerificationOptions, array $secondHttpVerificationOptions, array $expectedHttpOptions): void
     {
-        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientOptions);
+        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientHttpOptions);
 
-        $this->assertSame($expectedOptions, $client->handleOptions($firstVerificationOptions, $secondVerificationOptions));
+        $this->assertSame($expectedHttpOptions, $client->handleOptions($firstHttpVerificationOptions, $secondHttpVerificationOptions));
+    }
+
+    /**
+     * @dataProvider invalidHttpOptions
+     */
+    public function testInvalidClientHttpOptionsThrowsException(array $clientHttpOptions): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', $clientHttpOptions);
+    }
+
+    /**
+     * @dataProvider invalidHttpOptions
+     */
+    public function testInvalidProvidedHttpOptionsThrowsException(array $providedHttpOptions): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', []);
+
+        $client->handleOptions($providedHttpOptions);
+    }
+
+    /**
+     * @dataProvider invalidHttpOptions
+     */
+    public function testInvalidClientVerificationOptionsThrowsException(array $clientVerificationOptions): void
+    {
+        $this->expectException(CloudflareTurnstileApiException::class);
+
+        $client = new CloudflareTurnstileClient($this->createMock(HttpClientInterface::class), '', []);
+
+        $client->verify('<captcha_response>', $clientVerificationOptions);
     }
 
     public function emptyCaptchaResponses(): iterable
@@ -473,6 +508,30 @@ class CloudflareTurnstileClientTest extends TestCase
                 ],
                 'timeout' => 2,
                 'max_duration' => 2
+            ]
+        ];
+    }
+
+    public function invalidHttpOptions(): iterable
+    {
+        yield [
+            [
+                'unknown_option' => null
+            ]
+        ];
+
+        yield [
+            [
+                'timeout' => 1,
+                'unknown_option' => null
+            ]
+        ];
+
+        yield [
+            [
+                'timeout' => 1,
+                'max_duration' => 1,
+                'unknown_option' => null
             ]
         ];
     }

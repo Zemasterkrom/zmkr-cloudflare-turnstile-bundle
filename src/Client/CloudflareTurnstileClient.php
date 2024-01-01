@@ -2,6 +2,7 @@
 
 namespace Zemasterkrom\CloudflareTurnstileBundle\Client;
 
+use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExceptionInterface;
 use Zemasterkrom\CloudflareTurnstileBundle\Exception\CloudflareTurnstileApiException;
@@ -33,7 +34,15 @@ class CloudflareTurnstileClient implements CloudflareTurnstileClientInterface
 
     public function handleOptions(array ...$options): array
     {
-        return array_merge(isset($this->options) ? $this->options : [], ...$options);
+        $mergedOptions = array_merge(isset($this->options) ? $this->options : [], ...$options);
+
+        foreach (array_keys($mergedOptions) as $option) {
+            if ($option !== 'body' && $option !== 'timeout' && $option !== 'max_duration') {
+                throw new InvalidArgumentException(sprintf('Unsupported Cloudflare Turnstile client option : %s', $option));
+            }
+        }
+
+        return $mergedOptions;
     }
 
     public function verify($captchaResponse, array $options = []): bool
