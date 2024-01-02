@@ -89,11 +89,18 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
             'attr' => [
                 'class' => 'cf-turnstile',
                 'data-sitekey' => 'sitekey',
-                'data-response-field-name' => 'cf-turnstile-response'
+                'data-response-field-name' => 'cf-turnstile-response',
+                'data-language' => 'auto',
             ]
         ];
 
-        $this->assertStringContainsString('<div id="form_cloudflare_turnstile_container_widget" class="cf-turnstile" data-sitekey="sitekey" data-response-field-name="cf-turnstile-response"></div>', $this->renderWidget($options));
+        $widgetRendering = $this->renderWidget($options);
+
+        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_container_widget" .+></div>#', $widgetRendering);
+        $this->assertStringContainsString('class="cf-turnstile"', $widgetRendering);
+        $this->assertStringContainsString('data-sitekey="sitekey"', $widgetRendering);
+        $this->assertStringContainsString('data-response-field-name="cf-turnstile-response"', $widgetRendering);
+        $this->assertStringContainsString('data-language="auto"', $widgetRendering);
     }
 
     public function testCaptchaContainerRenderingWithMultipleAttributes(): void
@@ -104,6 +111,7 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
                 'class' => 'cf-turnstile',
                 'data-sitekey' => 'sitekey',
                 'data-response-field-name' => 'cf-turnstile-response',
+                'data-language' => 'auto',
                 'data-test-attr' => 'test',
                 'data-test-attr-two' => '',
                 'data-test-attr-three' => true,
@@ -111,7 +119,17 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
             ]
         ];
 
-        $this->assertStringContainsString('<div id="form_cloudflare_turnstile_container_widget" class="cf-turnstile" data-sitekey="sitekey" data-response-field-name="cf-turnstile-response" data-test-attr="test" data-test-attr-two="" data-test-attr-three="data-test-attr-three"></div>', $this->renderWidget($options));
+        $widgetRendering = $this->renderWidget($options);
+
+        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_container_widget" .+></div>#', $widgetRendering);
+        $this->assertStringContainsString('class="cf-turnstile"', $widgetRendering);
+        $this->assertStringContainsString('data-sitekey="sitekey"', $widgetRendering);
+        $this->assertStringContainsString('data-response-field-name="cf-turnstile-response"', $widgetRendering);
+        $this->assertStringContainsString('data-language="auto"', $widgetRendering);
+        $this->assertStringContainsString('data-test-attr="test"', $widgetRendering);
+        $this->assertStringContainsString('data-test-attr-two=""', $widgetRendering);
+        $this->assertStringContainsString('data-test-attr-three="data-test-attr-three"', $widgetRendering);
+        $this->assertStringNotContainsString('data-test-attr-four', $widgetRendering);
     }
 
     /**

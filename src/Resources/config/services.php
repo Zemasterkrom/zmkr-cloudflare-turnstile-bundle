@@ -26,7 +26,8 @@ return function (ContainerConfigurator $configurator) {
 
     $services->set('zmkr_cloudflare_turnstile.services.type.type', CloudflareTurnstileType::class)
         ->tag('form.type')
-        ->arg(0, new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.manager.properties_manager'));
+        ->arg(0, new ReferenceConfigurator('zmkr_cloudflare_turnstile.services.manager.properties_manager'))
+        ->arg(1, new ReferenceConfigurator('request_stack'));
 
     $services->set('zmkr_cloudflare_turnstile.services.validator.validator', CloudflareTurnstileCaptchaValidator::class)
         ->tag('validator.constraint_validator')
