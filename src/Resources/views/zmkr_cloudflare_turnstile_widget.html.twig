@@ -35,12 +35,12 @@
                         {%- endif -%}
 
                         {%- if individual_explicit_js_loader is not empty -%}
-                            window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}_cloudflare_turnstile_container_widget", "{{ individual_explicit_js_loader }}");
+                            window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}_cloudflare_turnstile_widget_container", "{{ individual_explicit_js_loader }}");
                         {%- endif -%}
                     </script>
                 {% endif %}
 
-                <div id="{{ id }}_cloudflare_turnstile_container_widget" {%- for attrname, attrvalue in attr -%}
+                <div id="{{ id }}_cloudflare_turnstile_widget_container" {%- for attrname, attrvalue in attr -%}
                     {%- if attrvalue is not same as(false) -%}
                         {{- " " -}}
                     {%- endif -%}

@@ -96,7 +96,7 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
 
         $widgetRendering = $this->renderWidget($options);
 
-        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_container_widget" .+></div>#', $widgetRendering);
+        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_widget_container" .+></div>#', $widgetRendering);
         $this->assertStringContainsString('class="cf-turnstile"', $widgetRendering);
         $this->assertStringContainsString('data-sitekey="sitekey"', $widgetRendering);
         $this->assertStringContainsString('data-response-field-name="cf-turnstile-response"', $widgetRendering);
@@ -121,7 +121,7 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
 
         $widgetRendering = $this->renderWidget($options);
 
-        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_container_widget" .+></div>#', $widgetRendering);
+        $this->assertMatchesRegularExpression('#<div id="form_cloudflare_turnstile_widget_container" .+></div>#', $widgetRendering);
         $this->assertStringContainsString('class="cf-turnstile"', $widgetRendering);
         $this->assertStringContainsString('data-sitekey="sitekey"', $widgetRendering);
         $this->assertStringContainsString('data-response-field-name="cf-turnstile-response"', $widgetRendering);
@@ -175,10 +175,10 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
         $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.onload', $firstWidgetRenderingNoOnloaddOption);
 
         $secondWidgetRenderingOnloadOption = $this->renderWidget(['id' => 'form', 'individual_explicit_js_loader' => 'cloudflareTurnstileLoader']);
-        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*form_cloudflare_turnstile_container_widget.*cloudflareTurnstileLoader.*)#', $secondWidgetRenderingOnloadOption);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*form_cloudflare_turnstile_widget_container.*cloudflareTurnstileLoader.*)#', $secondWidgetRenderingOnloadOption);
 
         $thirthWidgetRenderingOnloadOption = $this->renderWidget(['id' => 'form', 'individual_explicit_js_loader' => 'cloudflareTurnstileLoader2']);
-        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*form_cloudflare_turnstile_container_widget.*cloudflareTurnstileLoader2.*)#', $thirthWidgetRenderingOnloadOption);
+        $this->assertMatchesRegularExpression('#zmkrCloudflareTurnstileBundleCaptcha.onload(.*form_cloudflare_turnstile_widget_container.*cloudflareTurnstileLoader2.*)#', $thirthWidgetRenderingOnloadOption);
 
         $fourthWidgetRenderingNoOnloadOption = $this->renderWidget();
         $this->assertStringNotContainsString('zmkrCloudflareTurnstileBundleCaptcha.onload', $fourthWidgetRenderingNoOnloadOption);

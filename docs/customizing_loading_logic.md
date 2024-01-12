@@ -55,6 +55,9 @@ class CloudflareTurnstileTestController extends AbstractController
 }
 ```
 
+> [!NOTE]
+> The suffix for captcha containers with the `cf-turnstile` class is **_cloudflare_turnstile_widget_container**.
+
 ### 2. Individual explicit loading
 
 The previous explicit mode is called only once per request, since it is used as a global explicit loader. If you want to implement a custom loading logic for specific **Cloudflare Turnstile** captchas, you can use the `individual_explicit_js_loader` option inside an associated `CloudflareTurnstileType` field of your form builder:
