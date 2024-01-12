@@ -61,6 +61,7 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
         $this->assertSame(self::CAPTCHA_SITEKEY, $formView->vars['attr']['data-sitekey']);
+        $this->assertSame('light', $formView->vars['attr']['data-theme']);
         $this->assertSame('cf-turnstile', $formView->vars['attr']['class']);
         $this->assertTrue($formView->vars['enabled']);
         $this->assertEmpty($formView->vars['explicit_js_loader']);
@@ -255,6 +256,16 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
                 'data-language' => true
             ]
         ]);
+    }
+
+    public function testCaptchaThemeConfiguration(): void {
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-theme' => 'dark'
+            ]
+        ])->createView();
+
+        $this->assertSame('dark', $formView->vars['attr']['data-theme']);
     }
 
     /**

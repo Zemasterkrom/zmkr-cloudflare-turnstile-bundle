@@ -68,6 +68,7 @@ class CloudflareTurnstileType extends AbstractType
             'mapped' => false,
             'attr' => [
                 'data-sitekey' => $this->propertiesManager->getSitekey(),
+                'data-theme' => 'light',
                 'class' => 'cf-turnstile'
             ],
             'constraints' => [
@@ -105,12 +106,12 @@ class CloudflareTurnstileType extends AbstractType
             if ($normalizedLocale) {
                 $attributes['data-language'] = $normalizedLocale;
             }
-
             if (isset($attributes['class']) && !\is_scalar($attributes['class']) && !(\is_object($attributes['class']) && method_exists($attributes['class'], '__toString'))) {
                 throw new LogicException('Cloudflare Turnstile captcha widget class must be stringable');
             }
 
             $attributes['class'] = isset($attributes['class']) && (string) $attributes['class'] && !\is_bool($attributes['class']) ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
+            $attributes['data-theme'] = isset($attributes['data-theme']) ? $attributes['data-theme']: 'light';
 
             return $attributes;
         });
