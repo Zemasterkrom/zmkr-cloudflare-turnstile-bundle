@@ -36,8 +36,8 @@ You can modify the explicit **JavaScript** loader on a per-request basis by type
 
 namespace App\Controller;
 
+use App\Form\Type\ContactType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 
 class CloudflareTurnstileTestController extends AbstractController
@@ -47,7 +47,7 @@ class CloudflareTurnstileTestController extends AbstractController
         $propertiesManager->setExplicitJsLoader('<explicit_js_loader>');
 
         return $this->render('<twig_template_path>', [
-            'form' => $this->createForm(CloudflareTurnstileType::class)->createView()
+            'form' => $this->createForm(ContactType::class)->createView()
         ]);
     }
 
@@ -56,7 +56,7 @@ class CloudflareTurnstileTestController extends AbstractController
 ```
 
 > [!NOTE]
-> The suffix for captcha containers with the `cf-turnstile` class is **_cloudflare_turnstile_widget_container**.
+> Captcha containers will be associated with a `cf-turnstile` class and an HTML identifier suffix with the value **_cloudflare_turnstile_widget_container**. The HTML identifier prefix is determined by your **Symfony** form hierarchy, according to how the form builder works.
 
 ### 2. Individual explicit loading
 
@@ -103,8 +103,8 @@ You can modify the compatibility mode on a per-request basis by type-hinting the
 
 namespace App\Controller;
 
+use App\Form\Type\ContactType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 
 class CloudflareTurnstileTestController extends AbstractController
@@ -114,7 +114,7 @@ class CloudflareTurnstileTestController extends AbstractController
         $propertiesManager->setCompatibilityMode('<compatibility_mode>');
 
         return $this->render('<twig_template_path>', [
-            'form' => $this->createForm(CloudflareTurnstileType::class)->createView()
+            'form' => $this->createForm(ContactType::class)->createView()
         ]);
     }
 
