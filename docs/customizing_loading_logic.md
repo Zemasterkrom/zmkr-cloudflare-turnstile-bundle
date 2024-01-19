@@ -38,11 +38,12 @@ namespace App\Controller;
 
 use App\Form\Type\ContactType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 
 class CloudflareTurnstileTestController extends AbstractController
 {
-    public function contactForm(CloudflareTurnstilePropertiesManager $propertiesManager)
+    public function contactForm(CloudflareTurnstilePropertiesManager $propertiesManager): Response
     {
         $propertiesManager->setExplicitJsLoader('<explicit_js_loader>');
 
@@ -105,11 +106,12 @@ namespace App\Controller;
 
 use App\Form\Type\ContactType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
 
 class CloudflareTurnstileTestController extends AbstractController
 {
-    public function contactForm(CloudflareTurnstilePropertiesManager $propertiesManager)
+    public function contactForm(CloudflareTurnstilePropertiesManager $propertiesManager): Response
     {
         $propertiesManager->setCompatibilityMode('<compatibility_mode>');
 
