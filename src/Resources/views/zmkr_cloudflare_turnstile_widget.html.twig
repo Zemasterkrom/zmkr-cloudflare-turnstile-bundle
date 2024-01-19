@@ -23,7 +23,7 @@
                 {% if required or individual_explicit_js_loader is not empty %}
                     {% if not is_markup_already_included('widget_handler_script') %}
                         {% set widget_handler_script %}
-                            <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v0.4.js' )}}"></script>
+                            <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v1.0.js' )}}"></script>
                         {% endset %}
 
                         {{ strictly_include_unique_markup('widget_handler_script', widget_handler_script) }}
