@@ -3,8 +3,8 @@
 namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\JavaScript;
 
 use Facebook\WebDriver\Exception\JavascriptErrorException;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\BundleTestingKernel;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\ZmkrCloudflareTurnstileBundleFunctionalTestCase;
-use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
 
 /**
  * Functional test class checking the behavior of the Cloudflare Turnstile JavaScript widget handler (explicit JavaScript handler/loader when loading Cloudflare Turnstile)
@@ -105,7 +105,7 @@ EOF);
 
     protected static function getKernelClass(): string
     {
-        return ValidBundleTestingKernel::class;
+        return BundleTestingKernel::class;
     }
 
     protected function tearDown(): void

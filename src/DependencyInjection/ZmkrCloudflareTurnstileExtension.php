@@ -59,8 +59,6 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
      * Integrates the Twig view associated to the Cloudflare Turnstile captcha widget
      *
      * @param ContainerBuilder $container Builder of container definitions
-     *
-     * @throws InvalidConfigurationException If the Twig bundle is not loaded
      */
     public function prepend(ContainerBuilder $container): void
     {
@@ -68,8 +66,6 @@ class ZmkrCloudflareTurnstileExtension extends Extension implements PrependExten
             $container->prependExtensionConfig('twig', [
                 'form_themes' => ['@ZmkrCloudflareTurnstile/zmkr_cloudflare_turnstile_widget.html.twig']
             ]);
-        } else {
-            throw new InvalidConfigurationException('Twig is required by the bundle as Cloudflare Turnstile captcha is dynamically generated');
         }
     }
 }

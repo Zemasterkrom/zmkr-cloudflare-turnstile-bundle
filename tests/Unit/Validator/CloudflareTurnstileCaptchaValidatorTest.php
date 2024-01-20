@@ -30,8 +30,6 @@ class CloudflareTurnstileCaptchaValidatorTest extends ConstraintValidatorTestCas
      */
     public function setUp(): void
     {
-        BypassFinals::enable();
-
         $this->errorManager = new CloudflareTurnstileErrorManager(true);
         $this->client = $this->createMock(CloudflareTurnstileClientInterface::class);
         $this->enabled = true;

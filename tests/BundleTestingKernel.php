@@ -17,9 +17,9 @@ use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaV
 use Zemasterkrom\CloudflareTurnstileBundle\ZmkrCloudflareTurnstileBundle;
 
 /**
- * Valid bundle kernel that correctly integrates required bundles and marks services as public in order to test their integration
+ * Bundle kernel that correctly integrates required bundles and marks services as public in order to test their integration
  */
-class ValidBundleTestingKernel extends Kernel
+class BundleTestingKernel extends Kernel
 {
     const SERVICES = [
         CloudflareTurnstilePropertiesManager::class,
@@ -55,13 +55,13 @@ class ValidBundleTestingKernel extends Kernel
             public function process(ContainerBuilder $container): void
             {
                 foreach ($container->getDefinitions() as $definition) {
-                    if (in_array($definition->getClass(), ValidBundleTestingKernel::SERVICES)) {
+                    if (in_array($definition->getClass(), BundleTestingKernel::SERVICES)) {
                         $definition->setPublic(true);
                     }
                 }
 
                 foreach ($container->getAliases() as $id => $definition) {
-                    if (in_array($id, ValidBundleTestingKernel::SERVICES_ALIASES)) {
+                    if (in_array($id, BundleTestingKernel::SERVICES_ALIASES)) {
                         $definition->setPublic(true);
                     }
                 }

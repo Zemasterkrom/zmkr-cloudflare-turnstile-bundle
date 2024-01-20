@@ -8,12 +8,12 @@ use Zemasterkrom\CloudflareTurnstileBundle\Client\CloudflareTurnstileClientInter
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstileErrorManager;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
-use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\BundleTestingKernel;
 use Zemasterkrom\CloudflareTurnstileBundle\Twig\UniqueMarkupIncluderExtension;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptchaValidator;
 
 /**
- * Kernel test class asserting that the bundle can start with valid configuration.
+ * Kernel test class asserting that the bundle can start with valid configuration
  */
 class ValidKernelIntegrationTest extends KernelTestCase
 {
@@ -53,7 +53,7 @@ class ValidKernelIntegrationTest extends KernelTestCase
 
     protected static function getKernelClass(): string
     {
-        return ValidBundleTestingKernel::class;
+        return BundleTestingKernel::class;
     }
 
     protected function tearDown(): void

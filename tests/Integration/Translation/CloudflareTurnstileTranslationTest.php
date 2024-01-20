@@ -4,7 +4,7 @@ namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Integration\Translation;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\BundleTestingKernel;
 use Zemasterkrom\CloudflareTurnstileBundle\Validator\CloudflareTurnstileCaptcha;
 
 /**
@@ -36,7 +36,7 @@ class CloudflareTurnstileTranslationTest extends KernelTestCase
 
     protected static function getKernelClass(): string
     {
-        return ValidBundleTestingKernel::class;
+        return BundleTestingKernel::class;
     }
 
     public function tearDown(): void

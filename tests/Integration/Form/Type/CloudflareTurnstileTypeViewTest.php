@@ -8,7 +8,7 @@ use Symfony\Component\Form\Forms;
 use Twig\Environment;
 use Zemasterkrom\CloudflareTurnstileBundle\Form\Type\CloudflareTurnstileType;
 use Zemasterkrom\CloudflareTurnstileBundle\Manager\CloudflareTurnstilePropertiesManager;
-use Zemasterkrom\CloudflareTurnstileBundle\Test\ValidBundleTestingKernel;
+use Zemasterkrom\CloudflareTurnstileBundle\Test\BundleTestingKernel;
 
 /**
  * CloudflareTurnstileType associated widget view test class.
@@ -194,7 +194,7 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
 
     protected static function getKernelClass(): string
     {
-        return ValidBundleTestingKernel::class;
+        return BundleTestingKernel::class;
     }
 
     protected function tearDown(): void
