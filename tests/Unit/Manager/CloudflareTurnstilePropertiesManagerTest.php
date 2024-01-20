@@ -14,8 +14,18 @@ class CloudflareTurnstilePropertiesManagerTest extends TestCase
     {
         $propertiesManager = new CloudflareTurnstilePropertiesManager('', true);
 
+        $this->assertTrue($propertiesManager->isEnabled());
         $this->assertFalse($propertiesManager->isCompatibilityModeEnabled());
         $this->assertFalse($propertiesManager->isExplicitModeEnabled());
+    }
+
+    public function testEnabledProperty(): void
+    {
+        $propertiesManager = new CloudflareTurnstilePropertiesManager('', false);
+        $this->assertFalse($propertiesManager->isEnabled());
+
+        $propertiesManager->setEnabled(true);
+        $this->assertTrue($propertiesManager->isEnabled());
     }
 
     public function testCompatibilityModeProperty(): void

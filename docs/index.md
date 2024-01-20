@@ -8,6 +8,7 @@ Advanced usage documentation
 - [Modification of captcha rejection message translations](translation.md)
 - [Configuration of the HTTP client options](http_client_configuration.md)
 - [Configuration of the captcha language](language_configuration.md)
+- [Configuration of the captcha options](captcha_options_configuration.md)
 - [Client-side error domain management](client_side_error_domain_management.md)
 - [Customization of the loading logic](customizing_loading_logic.md)
-- [Captcha configuration](captcha_configuration.md)
+- [Deactivation or activation of captchas](captcha_deactivation_activation.md)

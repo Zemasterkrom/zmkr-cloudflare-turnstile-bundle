@@ -25,7 +25,7 @@ class CloudflareTurnstilePropertiesManager
     public function __construct(string $sitekey, bool $enabled, string $explicitJsLoader = null, string $compatibilityMode = null)
     {
         $this->sitekey = $sitekey;
-        $this->enabled = $enabled;
+        $this->setEnabled($enabled);
         $this->setExplicitJsLoader($explicitJsLoader);
         $this->setCompatibilityMode($compatibilityMode);
     }
@@ -35,7 +35,12 @@ class CloudflareTurnstilePropertiesManager
         return $this->sitekey;
     }
 
-    public function isEnabled(): bool
+    public function setEnabled(bool $enabled): void
+    {
+        $this->enabled = $enabled;
+    }
+
+    public function &isEnabled(): bool
     {
         return $this->enabled;
     }

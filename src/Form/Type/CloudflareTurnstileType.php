@@ -111,7 +111,7 @@ class CloudflareTurnstileType extends AbstractType
             }
 
             $attributes['class'] = isset($attributes['class']) && (string) $attributes['class'] && !\is_bool($attributes['class']) ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
-            $attributes['data-theme'] = isset($attributes['data-theme']) ? $attributes['data-theme']: 'light';
+            $attributes['data-theme'] = isset($attributes['data-theme']) ? $attributes['data-theme'] : 'light';
 
             return $attributes;
         });
@@ -131,7 +131,7 @@ class CloudflareTurnstileType extends AbstractType
         $view->vars['explicit_js_loader'] = &$this->propertiesManager->getExplicitJsLoader();
         $view->vars['individual_explicit_js_loader'] = $options['individual_explicit_js_loader'];
         $view->vars['compatibility_mode'] = &$this->propertiesManager->getCompatibilityMode();
-        $view->vars['enabled'] = $this->propertiesManager->isEnabled();
+        $view->vars['enabled'] = &$this->propertiesManager->isEnabled();
         $view->vars['attr']['data-response-field-name'] = $view->vars['full_name'];
     }
 

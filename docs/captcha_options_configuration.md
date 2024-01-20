@@ -1,5 +1,5 @@
-Captcha configuration
-=====================
+Configuration of the captcha options
+====================================
 
 You can take full advantage of the **Cloudflare Turnstile** configuration by using the `data-` attributes described in the **Cloudflare Turnstile** [documentation](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/#configurations):
 

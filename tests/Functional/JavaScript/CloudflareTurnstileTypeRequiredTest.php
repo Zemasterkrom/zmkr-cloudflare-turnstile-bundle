@@ -1,6 +1,6 @@
 <?php
 
-namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\Form\Type;
+namespace Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\JavaScript;
 
 use Facebook\WebDriver\Exception\JavascriptErrorException;
 use Zemasterkrom\CloudflareTurnstileBundle\Test\Functional\ZmkrCloudflareTurnstileBundleFunctionalTestCase;

@@ -130,13 +130,30 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $this->assertNull($secondFormView->vars['compatibility_mode']);
     }
 
-    public function testCaptchaFormTypeDisabledFlag(): void
+    public function testCaptchaFormTypeActivationFlag(): void
     {
         $this->propertiesManager = new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, false);
         $this->initializeFormTypeFactory();
-        $formView = $this->factory->create(CloudflareTurnstileType::class)->createView();
 
-        $this->assertFalse($formView->vars['enabled']);
+        $firstForm = $this->factory->create(CloudflareTurnstileType::class);
+        $firstFormView = $firstForm->createView();
+
+        $this->assertFalse($firstFormView->vars['enabled']);
+
+        $this->propertiesManager->setEnabled(true);
+        $secondForm = $this->factory->create(CloudflareTurnstileType::class);
+        $secondFormView = $secondForm->createView();
+
+        $this->assertTrue($secondFormView->vars['enabled']);
+        $this->assertTrue($firstFormView->vars['enabled']);
+
+        $this->propertiesManager->setEnabled(false);
+        $thirthForm = $this->factory->create(CloudflareTurnstileType::class);
+        $thirthFormView = $thirthForm->createView();
+
+        $this->assertFalse($thirthFormView->vars['enabled']);
+        $this->assertFalse($firstFormView->vars['enabled']);
+        $this->assertFalse($secondFormView->vars['enabled']);
     }
 
     public function testCaptchaAttemptToCustomizeResponseFieldNameThrowsException(): void
@@ -258,7 +275,8 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         ]);
     }
 
-    public function testCaptchaThemeConfiguration(): void {
+    public function testCaptchaThemeConfiguration(): void
+    {
         $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
             'attr' => [
                 'data-theme' => 'dark'
