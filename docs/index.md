@@ -12,3 +12,5 @@ Advanced usage documentation
 - [Client-side error domain management](client_side_error_domain_management.md)
 - [Customization of the loading logic](customizing_loading_logic.md)
 - [Deactivation or activation of captchas](captcha_deactivation_activation.md)
+- [Marking captchas as required](captcha_required_flag.md)
+- [Manual captcha validation](captcha_manual_validation.md)

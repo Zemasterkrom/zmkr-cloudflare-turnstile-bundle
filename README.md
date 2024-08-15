@@ -14,6 +14,7 @@ Summary of features provided:
 - Client-side error domain management
 - reCAPTCHA / hCaptcha compatibility mode
 - Possibility of using custom JavaScript rendering logic
+- Possibility of marking captchas as required
 
 Get started
 -----------
@@ -125,7 +126,6 @@ class CloudflareTurnstileTestController extends AbstractController
         }
 
         // The form has not been submitted or is invalid: if there is an error, an error message will be registered in your form
-
         return $this->render('<twig_template_path>', [
             'form' => $form->createView(),
         ]);
