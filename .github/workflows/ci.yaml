@@ -62,12 +62,12 @@ jobs:
         uses: ramsey/composer-install@v3
 
       - name: Install required Firefox libraries
-        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 -y
+        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 libasound2 -y
 
       - name: Install Firefox browser
         uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: "91.0"
+          firefox-version: "102.0"
 
       - name: Install Firefox drivers
         run: vendor/bin/bdi detect drivers
@@ -100,12 +100,12 @@ jobs:
         uses: ramsey/composer-install@v3
 
       - name: Install required Firefox libraries
-        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 -y
+        run: sudo apt-get update && sudo apt-get install libdbus-glib-1-2 libgtk-3-0 libx11-xcb1 libasound2 -y
 
       - name: Install Firefox browser
         uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: "91.0"
+          firefox-version: "102.0"
 
       - name: Install Firefox drivers
         run: vendor/bin/bdi detect drivers
