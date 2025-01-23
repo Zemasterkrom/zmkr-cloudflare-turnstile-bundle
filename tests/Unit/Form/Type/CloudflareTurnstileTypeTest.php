@@ -334,6 +334,20 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         $this->assertSame($expectedClass, $formView->vars['attr']['class']);
     }
 
+    /**
+     * If attributes are registered on a CloudflareTurnstileType, the default attributes must be merged with the custom attributes
+     *
+     * @dataProvider attributesCombinations
+     */
+    public function testTurnstileAttrsMerging(array $providedAttrs, array $expectedAttrs): void
+    {
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => $providedAttrs
+        ])->createView();
+
+        $this->assertEqualsCanonicalizing($expectedAttrs, $formView->vars['attr']);
+    }
+
     public function testCaptchaFormTypeResponseOnSubmitIsCorrect(): void
     {
         $responseToken = '<response_token>';
@@ -405,6 +419,89 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
 
         yield ['test acf-turnstile cf-turnstile test2', 'test acf-turnstile cf-turnstile test2'];
         yield ['test cf-turnstilea cf-turnstile test2', 'test cf-turnstilea cf-turnstile test2'];
+    }
+
+    public function attributesCombinations(): iterable
+    {
+        $this->propertiesManager = new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true);
+        $this->initializeFormTypeFactory();
+        
+        $formAttrs = $this->factory->create(CloudflareTurnstileType::class)->createView()->vars['attr'];
+
+        yield [
+            [],
+            $formAttrs
+        ];
+        yield [
+            [
+                'data-test' => 'test'
+            ],
+            array_merge($formAttrs, [
+                'data-test' => 'test'
+            ])
+        ];
+        yield [
+            [
+                'data-test' => 'test',
+                'data-test2' => 'test2'
+            ],
+            array_merge($formAttrs, [
+                'data-test' => 'test',
+                'data-test2' => 'test2'
+            ])
+        ];
+        yield [
+            [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => 'test2'
+            ],
+            array_merge($formAttrs, [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => 'test2'
+            ])
+        ];
+        yield [
+            [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => [
+                    'test-nested2' => 'test-nested2'
+                ]
+            ],
+            array_merge($formAttrs, [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => [
+                    'test-nested2' => 'test-nested2'
+                ]
+            ])
+        ];
+        yield [
+            [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => [
+                    'test-nested2' => 'test-nested2'
+                ],
+                'data-test3' => 'test3'
+            ],
+            array_merge($formAttrs, [
+                'data-test' => [
+                    'test-nested' => 'test-nested'
+                ],
+                'data-test2' => [
+                    'test-nested2' => 'test-nested2'
+                ],
+                'data-test3' => 'test3'
+            ])
+        ];
     }
 
     public function classesWithMixedData(): iterable

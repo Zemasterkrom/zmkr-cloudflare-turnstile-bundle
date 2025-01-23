@@ -14,12 +14,12 @@ class CloudflareTurnstileCaptcha extends Constraint
     /**
      * CloudflareTurnstileCaptcha captcha constraint properties initializer
      *
-     * @param string|null $message Error message used when validation fails
+     * @param ?string $message Error message used when validation fails
      * @param mixed $options The options (as associative array) or the value for the default option (any other type)
-     * @param string[] $groups An array of validation groups
+     * @param ?string[] $groups An array of validation groups
      * @param mixed $payload Domain-specific data attached to a constraint
      */
-    public function __construct(string $message = null, $options = null, array $groups = null, $payload = null)
+    public function __construct(?string $message = null, $options = null, ?array $groups = null, $payload = null)
     {
         parent::__construct($options, $groups, $payload);
 

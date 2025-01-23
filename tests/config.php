@@ -8,12 +8,12 @@ return function (ContainerConfigurator $configurator) {
         'captcha' => [
             'sitekey' => '<sitekey>',
             'secret_key' => '<secret_key>',
-        ],
+        ]
     ]);
 
     $frameworkConfig = [
         'test' => true,
-        'secret' => '',
+        'secret' => 'secret',
         'http_method_override' => false,
         'validation' => [
             'email_validation_mode' => 'html5'

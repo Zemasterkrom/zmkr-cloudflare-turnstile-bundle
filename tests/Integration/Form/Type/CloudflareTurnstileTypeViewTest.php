@@ -32,7 +32,7 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
 
     private function renderWidget(array $options = []): string
     {
-        $templateOptions = array_replace_recursive(
+        $templateOptions = array_merge(
             $this->factory->create(CloudflareTurnstileType::class)->createView()->vars,
             $options
         );
@@ -101,6 +101,24 @@ class CloudflareTurnstileTypeViewTest extends KernelTestCase
         $this->assertStringContainsString('data-sitekey="sitekey"', $widgetRendering);
         $this->assertStringContainsString('data-response-field-name="cf-turnstile-response"', $widgetRendering);
         $this->assertStringContainsString('data-language="auto"', $widgetRendering);
+    }
+
+    public function testCaptchaRenderingWithFactoryAndCustomAttributes(): void {
+        $formVars = $this->factory->create(CloudflareTurnstileType::class, null,  [
+            'individual_explicit_js_loader' => 'cloudflareTurnstileLoader',
+            'attr' => [
+                'class' => 'test-class test-class-two',
+                'data-test' => 'test'
+            ]
+        ])->createView()->vars;
+
+        $widgetRendering = $this->renderWidget($formVars);
+
+        $this->assertMatchesRegularExpression('#<div id="' . $formVars['id'] . '_cloudflare_turnstile_widget_container" .+></div>#', $widgetRendering);
+        $this->assertStringContainsString('class="cf-turnstile test-class test-class-two"', $widgetRendering);
+        $this->assertStringContainsString('data-sitekey=""', $widgetRendering);
+        $this->assertStringContainsString('data-response-field-name="zmkr_cloudflare_turnstile"', $widgetRendering);
+        $this->assertStringContainsString('data-test="test"', $widgetRendering);
     }
 
     public function testCaptchaContainerRenderingWithMultipleAttributes(): void

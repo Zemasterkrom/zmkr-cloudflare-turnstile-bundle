@@ -18,10 +18,10 @@ class CloudflareTurnstileException extends \Exception
      * Constructor for the CloudflareTurnstileException
      *
      * @param string $message The error message describing the exception
-     * @param object|null $previous The previous exception used for chaining (default is null)
+     * @param ?object $previous The previous exception used for chaining (default is null)
      * @param int $code The error code, which can be set as non-critical or critical (default is non-critical)
      */
-    public function __construct(string $message = '', object $previous = null, int $code = self::NON_CRITICAL_ERROR)
+    public function __construct(string $message = '', ?object $previous = null, int $code = self::NON_CRITICAL_ERROR)
     {
         // Since the exception interfaces provided by Symfony do not necessarily extend the Throwable interface, we need to check the exception type dynamically
         if (null !== $previous && !$previous instanceof \Throwable) {

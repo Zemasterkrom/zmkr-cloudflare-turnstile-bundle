@@ -52,7 +52,7 @@ class CloudflareTurnstileType extends AbstractType
     private CloudflareTurnstilePropertiesManager $propertiesManager;
     private ?RequestStack $requestStack;
 
-    public function __construct(CloudflareTurnstilePropertiesManager $propertiesManager, RequestStack $requestStack = null)
+    public function __construct(CloudflareTurnstilePropertiesManager $propertiesManager, ?RequestStack $requestStack = null)
     {
         $this->propertiesManager = $propertiesManager;
         $this->requestStack = $requestStack;
@@ -63,20 +63,10 @@ class CloudflareTurnstileType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'individual_explicit_js_loader' => null,
-            'mapped' => false,
-            'attr' => [
-                'data-sitekey' => $this->propertiesManager->getSitekey(),
-                'data-theme' => 'light',
-                'class' => 'cf-turnstile'
-            ],
-            'constraints' => [
-                new CloudflareTurnstileCaptcha()
-            ]
-        ]);
+        $resolver->setDefaults($this->getDefaultAttributes());
 
         $resolver->setNormalizer('attr', function (Options $options, array $attributes) {
+            $attributes = array_merge($this->getDefaultAttributes()['attr'], $attributes);
             $normalizedLocale = null;
 
             if (isset($attributes['data-response-field-name'])) {
@@ -106,13 +96,14 @@ class CloudflareTurnstileType extends AbstractType
             if ($normalizedLocale) {
                 $attributes['data-language'] = $normalizedLocale;
             }
+            
             if (isset($attributes['class']) && !\is_scalar($attributes['class']) && !(\is_object($attributes['class']) && method_exists($attributes['class'], '__toString'))) {
                 throw new LogicException('Cloudflare Turnstile captcha widget class must be stringable');
             }
 
             $attributes['class'] = isset($attributes['class']) && (string) $attributes['class'] && !\is_bool($attributes['class']) ? (preg_match("/\bcf-turnstile\b/", $attributes['class']) ? $attributes['class'] : 'cf-turnstile ' . $attributes['class']) : 'cf-turnstile';
-            $attributes['data-theme'] = isset($attributes['data-theme']) ? $attributes['data-theme'] : 'light';
-
+            $attributes['data-theme'] ??= 'light';
+           
             return $attributes;
         });
 
@@ -149,5 +140,24 @@ class CloudflareTurnstileType extends AbstractType
     public function getParent(): string
     {
         return HiddenType::class;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getDefaultAttributes(): array
+    {
+        return [
+            'individual_explicit_js_loader' => null,
+            'mapped' => false,
+            'attr' => [
+                'data-sitekey' => $this->propertiesManager->getSitekey(),
+                'data-theme' => 'light',
+                'class' => 'cf-turnstile'
+            ],
+            'constraints' => [
+                new CloudflareTurnstileCaptcha()
+            ]
+        ];
     }
 }
