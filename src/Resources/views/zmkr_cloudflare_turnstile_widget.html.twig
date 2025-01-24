@@ -1,48 +1,48 @@
 {%- block zmkr_cloudflare_turnstile_widget -%}
-    {% apply spaceless %}
-        {% if enabled %}
-            <div id="{{ id }}_cloudflare_turnstile_container">
-                {% if not is_markup_already_included('cloudflare_turnstile_script') %}
-                    {% set cloudflare_turnstile_script_query_parameters = [] %}
+    {%- if enabled -%}
+        <div id="{{ id }}_cloudflare_turnstile_container">
+            {%- if not is_markup_already_included('cloudflare_turnstile_script') -%}
+                {%- set cloudflare_turnstile_script_query_parameters = [] -%}
 
-                    {% if explicit_js_loader is not empty %}
-                        {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'render': 'explicit', 'onload': explicit_js_loader}) %}
-                    {% endif %}
+                {%- if explicit_js_loader is not empty -%}
+                    {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'render': 'explicit', 'onload': explicit_js_loader}) %}
+                {%- endif -%}
 
-                    {% if compatibility_mode is not empty %}
-                        {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'compat': compatibility_mode}) %}
-                    {% endif %}
+                {%- if compatibility_mode is not empty -%}
+                    {% set cloudflare_turnstile_script_query_parameters = cloudflare_turnstile_script_query_parameters|merge({'compat': compatibility_mode}) %}
+                {%- endif -%}
 
-                    {% set cloudflare_turnstile_script %}
-                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ cloudflare_turnstile_script_query_parameters|length > 0 ? '?' ~ cloudflare_turnstile_script_query_parameters|url_encode : '' }}" defer></script>
-                    {% endset %}
+                {%- set cloudflare_turnstile_script -%}
+                    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js{{ cloudflare_turnstile_script_query_parameters|length > 0 ? '?' ~ cloudflare_turnstile_script_query_parameters|url_encode : '' }}" defer></script>
+                {%- endset -%}
 
-                    {{ strictly_include_unique_markup('cloudflare_turnstile_script', cloudflare_turnstile_script) }}
-                {% endif %}
+                {{- strictly_include_unique_markup('cloudflare_turnstile_script', cloudflare_turnstile_script) -}}
+            {%- endif -%}
 
-                {% if required or individual_explicit_js_loader is not empty %}
-                    {% if not is_markup_already_included('widget_handler_script') %}
-                        {% set widget_handler_script %}
-                            <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v1.0.js' )}}"></script>
-                        {% endset %}
+            {%- if required or individual_explicit_js_loader is not empty -%}
+                {%- if not is_markup_already_included('widget_handler_script') -%}
+                    {%- set widget_handler_script -%}
+                        <script src="{{ asset('bundles/zmkrcloudflareturnstile/js/zmkr_cloudflare_turnstile_widget_handler.v1.0.js' )}}"></script>
+                    {%- endset -%}
 
-                        {{ strictly_include_unique_markup('widget_handler_script', widget_handler_script) }}
-                    {% endif %}
+                    {{- strictly_include_unique_markup('widget_handler_script', widget_handler_script) -}}
+                {%- endif -%}
 
-                    <script>
-                        {%- if required -%}
-                            window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, "{{ full_name }}");
-                        {%- endif -%}
+                <script>
+                    {%- if required -%}
+                        window.zmkrCloudflareTurnstileBundleCaptcha.required(document.currentScript, "{{ full_name }}");
+                    {%- endif -%}
 
-                        {%- if individual_explicit_js_loader is not empty -%}
-                            window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}_cloudflare_turnstile_widget_container", "{{ individual_explicit_js_loader }}");
-                        {%- endif -%}
-                    </script>
-                {% endif %}
-
-                <div id="{{ id }}_cloudflare_turnstile_widget_container" {%- for attrname, attrvalue in attr -%}
+                    {%- if individual_explicit_js_loader is not empty -%}
+                        window.zmkrCloudflareTurnstileBundleCaptcha.onload("{{ id }}_cloudflare_turnstile_widget_container", "{{ individual_explicit_js_loader }}");
+                    {%- endif -%}
+                </script>
+            {%- endif -%}
+            
+            <div id="{{ id }}_cloudflare_turnstile_widget_container" 
+                {%- for attrname, attrvalue in attr -%}
                     {%- if attrvalue is not same as(false) -%}
-                        {{- " " -}}
+                            {{- " " -}}
                     {%- endif -%}
 
                     {%- if attrvalue is same as(true) -%}
@@ -50,8 +50,8 @@
                     {%- elseif attrvalue is not same as(false) -%}
                         {{- attrname }}="{{ attrvalue }}"
                     {%- endif -%}
-                {%- endfor -%}></div>
-            </div>
-        {% endif %}
-    {% endapply %}
+                {%- endfor -%}
+            ></div>
+        </div>
+    {%- endif -%}
 {%- endblock -%}
