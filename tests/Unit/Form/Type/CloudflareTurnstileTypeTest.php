@@ -253,6 +253,35 @@ class CloudflareTurnstileTypeTest extends TypeTestCase
         restore_error_handler();
     }
 
+    public function testCaptchaLanguageAutoConfigurationWithUnsupportedLocaleButDifferentCaptchaLanguage(): void {
+        $triggeredNotice = false;
+
+        set_error_handler(function () use (&$triggeredNotice) {
+            $triggeredNotice = true;
+
+            return true;
+        }, E_USER_NOTICE);
+
+        $request = new Request();
+        $request->setLocale('unsupportedd_locale');
+
+        $this->propertiesManager = new CloudflareTurnstilePropertiesManager(self::CAPTCHA_SITEKEY, true);
+        $this->requestStack = new RequestStack();
+        $this->requestStack->push($request);
+        $this->initializeFormTypeFactory();
+
+        $formView = $this->factory->create(CloudflareTurnstileType::class, null, [
+            'attr' => [
+                'data-language' => 'en'
+            ]
+        ])->createView();
+
+        $this->assertFalse($triggeredNotice);
+        $this->assertSame('en', $formView->vars['attr']['data-language']);
+
+        restore_error_handler();
+    }
+
     public function testCaptchaLanguageConfigurationWithUnsupportedLocaleThrowsException(): void
     {
         $this->expectException(InvalidOptionsException::class);
