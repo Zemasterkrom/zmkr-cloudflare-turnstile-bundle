@@ -2,15 +2,7 @@ name: Testing
 
 on:
   push:
-    branches:
-      - development
-      - main
-      - "[0-9]+.[0-9]+"
   pull_request:
-    branches:
-      - development
-      - main
-      - "[0-9]+.[0-9]+"
 
 jobs:
   test:
@@ -24,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP environment and dependencies
         uses: ./.github/actions/setup-php-env
@@ -49,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP environment and dependencies
         uses: ./.github/actions/setup-php-env
@@ -73,10 +65,11 @@ jobs:
   code-coverage:
     runs-on: ubuntu-latest
     name: Code coverage
+    if: vars.CODECOV_ENABLED == 'true' || github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP environment and dependencies
         uses: ./.github/actions/setup-php-env
@@ -93,8 +86,8 @@ jobs:
         run: composer phpunit -- --coverage-clover ./coverage.xml
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v3
-        if: ${{ !env.ACT }}
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
