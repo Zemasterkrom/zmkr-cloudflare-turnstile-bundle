@@ -3,9 +3,9 @@ ARG SYMFONY_VERSION=^5.4
 
 FROM php:${PHP_VERSION}-alpine
 
-ARG SYMFONY_VERSION
+ARG SYMFONY_VERSION=^5.4
 
-RUN apk add --no-cache libzip-dev && docker-php-ext-install zip
+RUN apk add --no-cache libzip-dev git && docker-php-ext-install zip
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json /tmp/composer.json

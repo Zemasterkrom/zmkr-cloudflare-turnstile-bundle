@@ -1,3 +1,16 @@
 {
     "php.workspace.includePath": "vendor/bin/.phpunit/phpunit/src",
+    "editor.formatOnSave": false,
+    "[php]": {
+        "editor.formatOnSave": false
+    },
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.php$",
+                "cmd": "${workspaceFolder}/vendor/bin/php-cs-fixer fix ${file}",
+                "isAsync": true
+            }
+        ]
+    }
 }

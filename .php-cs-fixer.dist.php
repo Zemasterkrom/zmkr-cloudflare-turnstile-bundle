@@ -9,7 +9,7 @@ return (new Config())
     ->setRiskyAllowed(false)
     ->setRules([
         '@auto' => true,
-        '@Symfony' => true
+        '@Symfony' => true,
     ])
     ->setFinder(
         (new Finder())
@@ -17,7 +17,7 @@ return (new Config())
             ->in(__DIR__)
             ->exclude([
                 'var',
-                'vendor'
+                'vendor',
             ])
     )
 ;
