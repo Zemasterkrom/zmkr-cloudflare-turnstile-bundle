@@ -3,7 +3,7 @@
 [![CI Status](https://github.com/zemasterkrom/zmkr-cloudflare-turnstile-bundle/actions/workflows/ci.yaml/badge.svg)](https://github.com/zemasterkrom/zmkr-cloudflare-turnstile-bundle/actions)
 [![codecov](https://codecov.io/gh/zemasterkrom/zmkr-cloudflare-turnstile-bundle/graph/badge.svg)](https://codecov.io/gh/Zemasterkrom/zmkr-cloudflare-turnstile-bundle/)
 
-Requires **Symfony `>= 5.4`** and **PHP `>= 8.2`**. Tested up to **Symfony 7**.
+Requires **Symfony `>= 5.4`** and **PHP `>= 8.2`**. Tested up to **Symfony 8**.
 
 The purpose of this bundle is to facilitate the configuration and integration of the **Cloudflare Turnstile** captcha system into **Symfony** forms.
 
