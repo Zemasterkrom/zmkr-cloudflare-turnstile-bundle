@@ -10,7 +10,10 @@ jobs:
     strategy:
       matrix:
         php: [8.2, 8.4]
-        symfony: [^5.4, ^6.0, ^7.0]
+        symfony: [^5.4, ^6.0, ^7.0, ^8.0]
+        exclude:
+          - php: 8.2
+            symfony: ^8.0
       fail-fast: false
     name: PHPUnit | PHPStan (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }})
 
@@ -29,15 +32,18 @@ jobs:
         with:
           version: "133.0"
 
+      - name: Run PHPStan tests
+        if: always()
+        run: composer phpstan
+
       - name: Run PHPUnit tests
         run: composer phpunit
-
-      - name: Run PHPStan tests
-        run: composer phpstan
 
   code-styling:
     runs-on: ubuntu-latest
     name: Code styling
+    strategy:
+      fail-fast: false
 
     steps:
       - name: Checkout repository

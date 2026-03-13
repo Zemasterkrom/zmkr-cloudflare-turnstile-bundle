@@ -20,21 +20,21 @@
     ],
     "require": {
         "php": ">=8.2",
-        "symfony/asset": "^5.4|^6.0|^7.0",
-        "symfony/config": "^5.4|^6.0|^7.0",
-        "symfony/form": "^5.4|^6.0|^7.0",
-        "symfony/framework-bundle": "^5.4|^6.0|^7.0",
-        "symfony/http-client": "^5.4|^6.0|^7.0",
-        "symfony/translation": "^5.4|^6.0|^7.0",
-        "symfony/twig-bundle": "^5.4|^6.0|^7.0",
-        "symfony/validator": "^5.4|^6.0|^7.0"
+        "symfony/asset": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/config": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/form": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/framework-bundle": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/http-client": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/translation": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/twig-bundle": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/validator": "^5.4|^6.0|^7.0|^8.0"
     },
     "require-dev": {
         "dbrekelmans/bdi": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpstan/phpstan-symfony": "^2.0",
         "symfony/panther": "^0.8|^1.0|^2.0",
-        "symfony/phpunit-bridge": "^5.4|^6.0|^7.0"
+        "symfony/phpunit-bridge": "^5.4|^6.0|^7.0|^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -51,7 +51,7 @@
     },
     "scripts": {
         "phpunit": "./vendor/bin/simple-phpunit",
-        "phpstan": "./vendor/bin/phpstan analyse",
+        "phpstan": "./vendor/bin/simple-phpunit install && ./vendor/bin/phpstan analyse",
         "php-cs-fixer": "./vendor/bin/php-cs-fixer",
         "php-cs-fixer:docker": "docker build -f docker/php-cs-fixer/Dockerfile -t zemasterkrom/zmkr-cloudflare-turnstile-bundle-php-cs-fixer:3-php8.2-symfony5.4 . && docker run --rm -v .:/app --name zmkr-cloudflare-turnstile-bundle-php-cs-fixer zemasterkrom/zmkr-cloudflare-turnstile-bundle-php-cs-fixer:3-php8.2-symfony5.4"
     },
