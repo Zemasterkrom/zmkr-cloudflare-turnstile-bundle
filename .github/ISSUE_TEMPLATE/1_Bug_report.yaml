@@ -1,4 +1,5 @@
-name: 🐛 Bug report
+name: 🐛 Bug Report
+description: Report a bug with this bundle
 labels: bug
 
 body:
