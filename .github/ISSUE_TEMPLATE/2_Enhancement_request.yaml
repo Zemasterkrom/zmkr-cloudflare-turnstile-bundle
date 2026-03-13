@@ -1,0 +1,16 @@
+name: 🚀 Enhancement or feature request
+labels: enhancement
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Description of the enhancement or feature you are suggesting.
+    validations:
+      required: true
+  - type: textarea
+    id: implementation-details
+    attributes:
+      label: Implementation details
+      description: You can describe how the enhancement or feature would work.

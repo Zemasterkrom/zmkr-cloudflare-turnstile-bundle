@@ -135,6 +135,10 @@ class CloudflareTurnstileTestController extends AbstractController
 
 For advanced usage, please see the [documentation](docs/index.md).
 
+## Contribute
+
+If you would like to contribute to the project, please refer to the [CONTRIBUTING](CONTRIBUTING.md) document.
+
 ## License
 
 This bundle is licensed under the MIT license. The license is accessible [here](LICENSE).

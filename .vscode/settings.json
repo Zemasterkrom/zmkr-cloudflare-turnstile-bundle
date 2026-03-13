@@ -8,8 +8,7 @@
         "commands": [
             {
                 "match": "\\.php$",
-                "cmd": "${workspaceFolder}/vendor/bin/php-cs-fixer fix ${file}",
-                "isAsync": true
+                "cmd": "${workspaceFolder}/vendor/bin/php-cs-fixer fix ${file}"
             }
         ]
     }
